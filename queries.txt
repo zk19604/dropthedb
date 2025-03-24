@@ -1,0 +1,23 @@
+GET
+/genre = Select * from genre
+/allusers = select * from users
+/artists = select * from artist
+
+POST
+/genre = Insert into genre (gname) values @gname
+/signup =   INSERT INTO users (uname, uemail, upassword, uage, ucountry) 
+            VALUES (@uname, @uemail, @upassword, @uage, @ucountry)
+/artist =   INSERT INTO artist (aname, instagram, gender, monthlystreams) 
+            VALUES (@aname, @instagram, @gender, @monthlystreams)
+
+
+PUT
+/genre = Update genre set gname=@gname where id=@id
+/users = update users set (depends) where id=@id 
+/artist = UPDATE artist SET depends WHERE id = @id
+
+
+DELETE
+/genre =delete from genre where id in @id
+/users = delete from users where id in @id
+/artist = DELETE FROM artist WHERE id IN @id

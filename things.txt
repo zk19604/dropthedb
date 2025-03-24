@@ -1,0 +1,23 @@
+refresh issue?!!?!?!
+login - done
+signup - done
+liking songs - only song title and track added - also already liked songs any indication???
+removing from likes - done
+disliking songs ?!?!?
+making a playlist - done
+adding songs to playlist
+removing songs from a playlist
+editing a playlist - name, description, image
+deleting a playlist - done
+adding a friend
+removing a friend 
+what are your friends listening kinda thing
+editing your profile - username, email, password, age, country
+deleting your account - done
+add in queue ?!?!?!?
+
+liked songs of x genre by user 
+liked songs by x artist x user
+songs of x genre in x playlist of x user
+
+profile and playlist images ?!?!
