@@ -1,11 +1,4 @@
 
-go 
-use master 
-go 
-drop database project 
-go
-create database project
-go
 use project; 
 go
 
@@ -136,7 +129,6 @@ go
 use project; 
 go
 
-
 go
 CREATE VIEW PlaylistSongsView AS
 SELECT ps.playlistid, s.id AS songid, s.stitle,  s.sgenre, s.salbumid, s.srating
@@ -144,20 +136,31 @@ FROM PLAYLIST_S ps
 INNER JOIN SONGS s ON ps.songsid = s.id;
 go
 
- SELECT u.id AS friendId, u.uname AS friendName
-            FROM FRIENDS f
-            JOIN USERS u ON 
-                (f.user1 = 1 AND u.id = f.user2) OR 
-                (f.user2 = 1 AND u.id = f.user1)
-GO
-CREATE VIEW UserLikedSongsView AS
-SELECT u.id AS user_id, u.uname, s.id AS song_id, s.stitle, g.gname AS genre
+CREATE OR ALTER VIEW UserLikedSongsView AS
+SELECT 
+    t.userid,
+    s.id AS songid,
+    s.stitle AS songtitle,
+    g.gname AS genre,
+    STRING_AGG(a.aname, ', ') AS artist_name,
+    al.aname AS album_name,
+    s.srating AS rating,
+    s.simage AS image_url,
+    s.trackuri AS track_uri
 FROM TASTE t
-JOIN USERS u ON t.userid = u.id
 JOIN SONGS s ON t.songsid = s.id
-JOIN GENRE g ON s.sgenre = g.id;
-go
+LEFT JOIN genre g ON s.sgenre = g.id
+LEFT JOIN album al ON s.salbumid = al.id
+LEFT JOIN songsANDartist sa ON s.id = sa.songsid
+LEFT JOIN artist a ON sa.artistid = a.id
+WHERE a.aname IS NOT NULL 
+GROUP BY 
+    t.userid,
+    s.id,
+    s.stitle,
+    g.gname,
+    al.aname,
+    s.srating,
+    s.simage,
+    s.trackuri;
 
---example admin
-insert into users(uname,uemail,upassword,uage,ucountry,u_created,u_type)
-values ('haziq','haziqk12211@gmail.com','12345678Aa!',30,'Waganda',getdate(),'a');
