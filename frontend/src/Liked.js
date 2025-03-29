@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 
 export const handlelike = async (songName, artistNames, imageUrl, trackUri, album, genre, rating) => {
@@ -12,7 +13,7 @@ export const handlelike = async (songName, artistNames, imageUrl, trackUri, albu
                 trackUri: trackUri,
                 authornames: artistNames, // Array of artists
                 genrename: genre,
-                albumname: genre,
+                albumname: album,
                 rating: rating,
                 simage: imageUrl,
                 userId: localStorage.getItem("userId"),
@@ -30,13 +31,14 @@ export const handlelike = async (songName, artistNames, imageUrl, trackUri, albu
     }
 };
 
-
 const Liked = () => {
     const [likedSongs, setLikedSongs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const uname = localStorage.getItem("username"); // ✅ Get username inside component
     const userid = localStorage.getItem("userId");
+
+
 
     // ✅ Define fetchLikedSongs inside Liked so we can update state
     const fetchLikedSongs = async () => {
@@ -46,6 +48,7 @@ const Liked = () => {
                 throw new Error("Failed to fetch liked songs");
             }
             const data = await response.json();
+            console.log("liked songs:", data);
             setLikedSongs(data);
         } catch (error) {
             setError(error.message);
@@ -55,9 +58,13 @@ const Liked = () => {
     };
 
     useEffect(() => {
-        fetchLikedSongs();
-    }, [uname]); // ✅ Only fetch when `uname` changes
-
+        if (uname) {
+            fetchLikedSongs();
+        }
+    }, [uname])
+    if (!uname) {
+        return <p>Error: Username not found in localStorage.</p>;
+    }
     const removeLike = async (songsid) => {
         try {
             const response = await fetch(`http://localhost:5001/taste`, {
@@ -83,27 +90,27 @@ const Liked = () => {
 
     return (
         <div>
-        <h1>Liked Songs</h1>
-        {likedSongs.length === 0 ? (
-            <p>No liked songs for this user.</p>
-        ) : (
-            <ul>
-                {likedSongs.map((song) => (
-                   <li key={song.songsid}>
-                   <strong>{song.stitle}</strong>  
-                   <br />
-                   <span>by {song.artist_name && song.artist_name.length > 0 ? song.artist_name : "Unknown Artist"}</span>  
-                   <br />
-                   <span>Album: {song.genre? song.genre : "Unknown Genre"}</span>
-                        <button onClick={() => removeLike(song.songsid)} style={{ marginLeft: "10px" }}>
-                            Remove Like
-                        </button>
-                    </li>
-                ))}
-            </ul>
-        )}
-    </div>
-    
+            <h1>Liked Songs</h1>
+            {likedSongs.length === 0 ? (
+                <p>No liked songs for this user.</p>
+            ) : (
+                <ul>
+                    {likedSongs.map((song) => (
+                        <li key={song.songsid}>
+                            <strong>{song.stitle}</strong>
+                            <br />
+                            <span>   by {Array.isArray(song.artist_name) ? song.artist_name.join(", ") : song.artist_name || "Unknown Artist"}</span>
+                            <br />
+                            <span>Genre: {song.genre || "Unknown Genre"}</span>
+                            <br />
+                            <button onClick={() => removeLike(song.songsid)} style={{ marginLeft: "10px" }}>
+                                Remove Like
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
     );
 };
 
