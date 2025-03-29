@@ -52,7 +52,7 @@ create table SONGS(
     sgenre int ,
     salbumid int, 
     srating float check(srating BETWEEN 1 AND 5), 
-    simage VARBINARY(MAX),
+    simage varchar(255),
     trackuri varchar(255),
     constraint sfk2 FOREIGN key (sgenre)
     REFERENCES genre(id),
@@ -125,6 +125,7 @@ select * from album
 select * from artist
 select * from genre 
 select * from friends
+select * from songsANDartist
 go
 use project; 
 go
@@ -164,3 +165,9 @@ GROUP BY
     s.simage,
     s.trackuri;
 
+go
+
+select * from UserLikedSongsView
+
+           
+    

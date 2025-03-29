@@ -12,7 +12,7 @@ export const handlelike = async (songName, artistNames, imageUrl, trackUri, albu
                 trackUri: trackUri,
                 authornames: artistNames, // Array of artists
                 genrename: genre,
-                albumname: album,
+                albumname: genre,
                 rating: rating,
                 simage: imageUrl,
                 userId: localStorage.getItem("userId"),
