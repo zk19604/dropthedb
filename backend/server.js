@@ -152,17 +152,26 @@ app.delete("/genre", async (req, res) => {
 
 //USER 
 
-// GET / Read request
 app.get("/allusers", async (req, res) => {
     try {
+        const { userId } = req.query; // Get userId from query parameters
+
+        if (!userId) {
+            return res.status(400).json({ message: "User ID is required" });
+        }
+
         const pool = await sql.connect(config);
-        const result = await pool.request().query("SELECT * FROM users");
+        const result = await pool.request()
+            .input("userId", sql.Int, userId) // Pass userId as input
+            .query("SELECT * FROM users WHERE id <> @userId");
+
         res.status(200).json(result.recordset);
     } catch (error) {
-        console.error("Error fetching: ", error);
-        res.status(500).json({ message: "Error fetching" });
+        console.error("Error fetching users: ", error);
+        res.status(500).json({ message: "Error fetching users" });
     }
 });
+
 
 //Post / Create request
 app.post("/signup", async (req, res) => {
@@ -1361,6 +1370,76 @@ app.get("/playlist-songs-by-genre", async (req, res) => {
     }
 });
 
+
+app.get("/friends", async (req, res) => {
+    try {
+        const { userId } = req.query; // Get userId from query parameters
+
+        if (!userId) {
+            return res.status(400).json({ message: "User ID is required" });
+        }
+
+        const query = `
+            SELECT u.id AS friendId, u.uname AS friendName
+            FROM FRIENDS f
+            JOIN USERS u ON 
+                (f.user1 = @userId AND u.id = f.user2) OR 
+                (f.user2 = @userId AND u.id = f.user1)
+        `;
+
+        const pool = await sql.connect(config);
+        const result = await pool.request()
+            .input("userId", sql.Int, userId)
+            .query(query);
+
+        res.status(200).json(result.recordset);
+    } catch (error) {
+        console.error("Error fetching friends:", error);
+        res.status(500).json({ message: "Error fetching friends", error: error.message });
+    }
+});
+
+app.post("/addfriends", async (req, res) => {
+    try {
+        const { user1, user2 } = req.body; // Get user IDs from request body
+
+        if (!user1 || !user2) {
+            return res.status(400).json({ message: "Both user1 and user2 are required" });
+        }
+
+        if (user1 === user2) {
+            return res.status(400).json({ message: "A user cannot be friends with themselves" });
+        }
+
+        const pool = await sql.connect(config);
+
+        // Check if the friendship already exists
+        const checkFriendship = await pool.request()
+            .input("user1", sql.Int, user1)
+            .input("user2", sql.Int, user2)
+            .query(`
+                SELECT * FROM FRIENDS 
+                WHERE (user1 = @user1 AND user2 = @user2) 
+                   OR (user1 = @user2 AND user2 = @user1)
+            `);
+
+        if (checkFriendship.recordset.length > 0) {
+            return res.status(400).json({ message: "Friendship already exists" });
+        }
+
+        // Insert new friendship
+        await pool.request()
+            .input("user1", sql.Int, user1)
+            .input("user2", sql.Int, user2)
+            .query("INSERT INTO FRIENDS (user1, user2) VALUES (@user1, @user2)");
+
+        res.status(201).json({ message: "Friendship added successfully!" });
+
+    } catch (error) {
+        console.error("Error adding friends:", error);
+        res.status(500).json({ message: "Error adding friends", error: error.message });
+    }
+});
 
 
 app.listen(port, () => {

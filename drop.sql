@@ -131,6 +131,9 @@ select * from album
 select * from artist
 select * from genre 
 select * from friends
+go
+use project; 
+go
 
 
 
@@ -141,3 +144,8 @@ FROM PLAYLIST_S ps
 INNER JOIN SONGS s ON ps.songsid = s.id;
 go
 
+ SELECT u.id AS friendId, u.uname AS friendName
+            FROM FRIENDS f
+            JOIN USERS u ON 
+                (f.user1 = 1 AND u.id = f.user2) OR 
+                (f.user2 = 1 AND u.id = f.user1)
