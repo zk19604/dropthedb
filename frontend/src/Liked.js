@@ -46,6 +46,7 @@ const Liked = () => {
                 throw new Error("Failed to fetch liked songs");
             }
             const data = await response.json();
+            console.log("liked songs:", data);
             setLikedSongs(data);
         } catch (error) {
             setError(error.message);
@@ -83,29 +84,31 @@ const Liked = () => {
 
     return (
         <div>
-        <h1>Liked Songs</h1>
-        {likedSongs.length === 0 ? (
-            <p>No liked songs for this user.</p>
-        ) : (
-            <ul>
-                {likedSongs.map((song) => (
-                   <li key={song.songsid}>
-                   <strong>{song.stitle}</strong>  
-                   <br />
-                   <span>by {song.artists && song.artists.length > 0 ? song.artists : "Unknown Artist"}</span>  
-                   <br />
-                   <span>Genre: {song.genre ? song.genre : "Unknown Genre"}</span>
-               
-               
-                        <button onClick={() => removeLike(song.songsid)} style={{ marginLeft: "10px" }}>
-                            Remove Like
-                        </button>
-                    </li>
-                ))}
-            </ul>
-        )}
-    </div>
-    
+            <h1>Liked Songs</h1>
+            {likedSongs.length === 0 ? (
+                <p>No liked songs for this user.</p>
+            ) : (
+                <ul>
+                    {likedSongs.map((song) => (
+                        <li key={song.songsid}>
+                            <strong>{song.stitle}</strong>
+                            <br />
+                            {/* <span>by {song.artist_name ? song.artist_name : "Unknown Artist"}</span> */}
+                            <span>by {Array.isArray(song.artist_name) ? song.artist_name.join(", ") : song.artist_name}</span>
+
+                            <br />
+                            <span>Genre: {song.genre ? song.genre : "Unknown Genre"}</span>
+
+
+                            <button onClick={() => removeLike(song.songsid)} style={{ marginLeft: "10px" }}>
+                                Remove Like
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+
     );
 };
 

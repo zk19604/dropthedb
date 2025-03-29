@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { handlelike } from "./Liked";
-import {handleplaylist} from "./Playlist"
+import { handleplaylist } from "./Playlist"
 const clientId = "2cbadd009ef8428285512f390151a730";
 const clientSecret = "f8e498771c7f42f29fccfa9a72083555";
 const redirectUri = "http://localhost:3000/home";
@@ -100,14 +100,21 @@ async function getAccessToken(code) {
   return null;
 }
 
+// async function fetchProfile(token) {
+//   const result = await fetch("https://api.spotify.com/v1/me", {
+//     method: "GET",
+//     headers: { Authorization: `Bearer ${token}` },
+//   });
+//   return await result.json();
+// }
 async function fetchProfile(token) {
-  const result = await fetch("https://api.spotify.com/v1/me", {
-    method: "GET",
-    headers: { Authorization: `Bearer ${token}` },
+  const response = await fetch('https://api.spotify.com/v1/me', {
+    headers: { 'Authorization': `Bearer ${token}` }
   });
-  return await result.json();
+  const profile = await response.json();
+  console.log('Spotify Profile:', profile);
+  return profile;
 }
-
 async function initializeSpotifyPlayer(token, setPlayer, setDeviceId) {
   //web player sdk
   const script = document.createElement("script");
@@ -163,13 +170,12 @@ async function pauseMusic(token) {
   });
 }
 
+
 async function searchSongs(token, query) {
   if (!query) return [];
 
   const result = await fetch(
-    `https://api.spotify.com/v1/search?q=${encodeURIComponent(
-      query
-    )}&type=track&limit=10`,
+    `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=10`,
     {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
@@ -177,9 +183,29 @@ async function searchSongs(token, query) {
   );
 
   const data = await result.json();
-  console.log(data);
-  return data.tracks.items || [];
+
+  if (!data.tracks || !data.tracks.items) {
+    console.log("No tracks found.");
+    return [];
+  }
+
+  // Extract and log song details
+  data.tracks.items.forEach(track => {
+    console.log("Song Name:", track.name);
+    console.log("Artists:", track.artists.map(artist => artist.name).join(", "));
+    console.log("Album Name:", track.album.name);
+    console.log("Album Cover:", track.album.images[0]?.url);
+    console.log("Duration (ms):", track.duration_ms);
+    console.log("Explicit:", track.explicit ? "Yes" : "No");
+    console.log("Popularity:", track.popularity);
+    console.log("Preview URL:", track.preview_url || "No preview available");
+    console.log("Spotify URI:", track.uri);
+    console.log("----------------------------");
+  });
+
+  return data.tracks.items;
 }
+
 
 function Player() {
   const [profile, setProfile] = useState(null);
@@ -200,12 +226,15 @@ function Player() {
         const userProfile = await fetchProfile(token);
         setProfile(userProfile);
         initializeSpotifyPlayer(token, setPlayer, setDeviceId);
+
       } else {
         console.error("Failed to get access token");
       }
     }
     fetchToken();
   }, [token]);
+
+
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -280,18 +309,20 @@ function Player() {
                     Like
                   </button>
 
-                 
-                  <button 
-                        onClick={() => handleplaylist(track.name, track.artists.map(artist => artist.name).join(", "),track.album.images[0]?.url,track.uri)} 
-                        style={{ marginLeft: "10px" }}
-                      >
-                       Add to playlist
-                      </button>
+
+                  <button
+                    onClick={() => handleplaylist(track.name, track.artists.map(artist => artist.name).join(", "), track.album.images[0]?.url, track.uri)}
+                    style={{ marginLeft: "10px" }}
+                  >
+                    Add to playlist
+                  </button>
                 </div>
               ))}
             </div>
           )}
+
         </div>
+
       ) : (
         <button onClick={loginWithSpotify}>Login with Spotify</button>
       )}

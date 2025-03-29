@@ -1,31 +1,31 @@
 import React, { useState, useEffect } from "react";
 
-export const handleplaylist = async() => {
-  
+export const handleplaylist = async () => {
+
 }
 export const addsongstoplaylist = async (playlistid, songId) => {
-    try {
-        if (!playlistId || !songId) {
-            throw new Error("Playlist ID and Song ID are required");
-        }
-
-        const response = await fetch(`http://localhost:5001/playlist_s`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ playlistid, songId }),
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || "Failed to add song to playlist");
-        }
-
-        console.log("Song added successfully to playlist");
-        return true; // Indicate success
-    } catch (error) {
-        console.error("Error adding song to playlist:", error);
-        return false; // Indicate failure
+  try {
+    if (!playlistid || !songId) {
+      throw new Error("Playlist ID and Song ID are required");
     }
+
+    const response = await fetch(`http://localhost:5001/playlist_s`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ playlistid, songId }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to add song to playlist");
+    }
+
+    console.log("Song added successfully to playlist");
+    return true; // Indicate success
+  } catch (error) {
+    console.error("Error adding song to playlist:", error);
+    return false; // Indicate failure
+  }
 };
 
 // Create Playlist Function (Outside the Component)
@@ -95,33 +95,33 @@ const Playlist = () => {
   const userId = localStorage.getItem("userId");
 
   const deletePlaylist = async (playlistId) => {
-  try {
-    if (!playlistId) {
-      throw new Error("Playlist ID is required");
-    }
-
-    const response = await fetch(
-      `http://localhost:5001/playlist/${playlistId}`,
-      {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+    try {
+      if (!playlistId) {
+        throw new Error("Playlist ID is required");
       }
-    );
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to delete playlist");
+      const response = await fetch(
+        `http://localhost:5001/playlist/${playlistId}`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to delete playlist");
+      }
+
+      console.log("Playlist deleted successfully");
+      return true; // Indicate success
+    } catch (error) {
+      console.error("Error deleting playlist:", error);
+      return false; // Indicate failure
     }
+  };
 
-    console.log("Playlist deleted successfully");
-    return true; // Indicate success
-  } catch (error) {
-    console.error("Error deleting playlist:", error);
-    return false; // Indicate failure
-  }
-};
-
-const fetchPlaylists = async () => {
+  const fetchPlaylists = async () => {
     try {
       const userId = localStorage.getItem("userId");
       if (!userId) throw new Error("User ID is missing");
@@ -142,7 +142,7 @@ const fetchPlaylists = async () => {
   };
   // Fetch playlists when component mounts
   useEffect(() => {
-    
+
 
     fetchPlaylists();
   }, []);
