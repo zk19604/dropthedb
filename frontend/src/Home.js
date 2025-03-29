@@ -15,7 +15,7 @@ function Home() {
       <Playlist />
       <Liked uname={username} /> 
       <Player />
-      <Liked uname={username} /> 
+     
      <a href="/delete">Tired of us? wanna delete?</a>
     </div>
   );

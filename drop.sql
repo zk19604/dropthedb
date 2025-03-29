@@ -51,7 +51,7 @@ create table SONGS(
     stitle varchar(255) not null,
     sgenre int ,
     salbumid int, 
-    srating float check(srating BETWEEN 1 AND 5), 
+    srating float check(srating BETWEEN 0 AND 100), 
     simage varchar(255),
     trackuri varchar(255),
     constraint sfk2 FOREIGN key (sgenre)
