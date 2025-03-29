@@ -127,8 +127,9 @@ const Friends = () => {
             <br />
             <span>by {song.artist_name && song.artist_name.length > 0 ? song.artist_name : "Unknown Artist"}</span>  
             <br />
-            <span>Album: {song.genre? song.genre : "Unknown Genre"}</span>
-                
+            <span>Album: {song.album_name? song.album_name : "Unknown Genre"}</span>
+            <br/>
+              <span>friend : {song.friend_id}</span>
              </li>
           ))}
         </ul>

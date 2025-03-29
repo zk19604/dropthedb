@@ -12,7 +12,7 @@ export const handlelike = async (songName, artistNames, imageUrl, trackUri, albu
                 trackUri: trackUri,
                 authornames: artistNames, // Array of artists
                 genrename: genre,
-                albumname: genre,
+                albumname: album,
                 rating: rating,
                 simage: imageUrl,
                 userId: localStorage.getItem("userId"),
@@ -94,7 +94,7 @@ const Liked = () => {
                    <br />
                    <span>by {song.artist_name && song.artist_name.length > 0 ? song.artist_name : "Unknown Artist"}</span>  
                    <br />
-                   <span>Album: {song.genre? song.genre : "Unknown Genre"}</span>
+                   <span>Album: {song.album_name? song.album_name : "Unknown Genre"}</span>
                         <button onClick={() => removeLike(song.songsid)} style={{ marginLeft: "10px" }}>
                             Remove Like
                         </button>

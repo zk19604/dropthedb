@@ -520,84 +520,6 @@ app.get("/songs", async (req, res) => {
   }
 });
 
-app.post("/songs", async (req, res) => {
-  try {
-    const { stitle, sartist, sgenre, salbumid, srating, simage } = req.body;
-
-    if (!stitle || !sartist || !sgenre) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
-
-    const query = `INSERT INTO SONGS (stitle, sartist, sgenre, salbumid, srating, simage)
-                       VALUES (@stitle, @sartist, @sgenre, @salbumid, @srating, @simage)`;
-
-    const pool = await sql.connect(config);
-    const request = pool.request();
-    request.input("stitle", sql.VarChar, stitle);
-    request.input("sartist", sql.Int, sartist);
-    request.input("sgenre", sql.Int, sgenre);
-    request.input("salbumid", sql.Int, salbumid || null);
-    request.input("srating", sql.Float, srating || null);
-    request.input("simage", sql.VarBinary, simage || null);
-
-    await request.query(query);
-    res.status(201).json({ message: "Song added successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Error adding song" });
-  }
-});
-
-app.put("/songs", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { stitle, sartist, sgenre, salbumid, srating, simage } = req.body;
-
-    let updates = [];
-    const request = new sql.Request();
-
-    if (stitle) {
-      updates.push("stitle = @stitle");
-      request.input("stitle", sql.VarChar, stitle);
-    }
-    if (sartist) {
-      updates.push("sartist = @sartist");
-      request.input("sartist", sql.Int, sartist);
-    }
-    if (sgenre) {
-      updates.push("sgenre = @sgenre");
-      request.input("sgenre", sql.Int, sgenre);
-    }
-    if (salbumid) {
-      updates.push("salbumid = @salbumid");
-      request.input("salbumid", sql.Int, salbumid);
-    }
-    if (srating) {
-      updates.push("srating = @srating");
-      request.input("srating", sql.Float, srating);
-    }
-    if (simage) {
-      updates.push("simage = @simage");
-      request.input("simage", sql.VarBinary, simage);
-    }
-
-    if (updates.length === 0) {
-      return res.status(400).json({ message: "No fields to update" });
-    }
-
-    const query = `UPDATE SONGS SET ${updates.join(", ")} WHERE id = @id`;
-    request.input("id", sql.Int, id);
-
-    const result = await request.query(query);
-
-    if (result.rowsAffected[0] === 0) {
-      return res.status(404).json({ message: "Song not found" });
-    }
-
-    res.status(200).json({ message: "Song updated successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Error updating song" });
-  }
-});
 
 app.delete("/songs", async (req, res) => {
   try {
@@ -870,31 +792,6 @@ app.delete("/playlist_s", async (req, res) => {
 });
 
 //functional queries
-//views
-//all the songs of a playlist
-app.get("/playlist_s/:playlistid", async (req, res) => {
-  try {
-    const { playlistid } = req.params;
-
-    if (!playlistid) {
-      return res.status(400).json({ message: "Playlist ID is required" });
-    }
-
-    // Query from the view instead of using a join
-    const query = `SELECT * FROM PlaylistSongsView WHERE playlistid = @playlistid`;
-
-    const pool = await sql.connect(config);
-    const request = pool.request();
-    request.input("playlistid", sql.Int, playlistid);
-
-    const result = await request.query(query);
-    res.status(200).json(result.recordset);
-  } catch (error) {
-    console.error("Error fetching songs from playlist:", error);
-    res.status(500).json({ message: "Error fetching songs from playlist" });
-  }
-});
-
 //get user by email and password for login
 app.post("/login", async (req, res) => {
   try {
@@ -936,6 +833,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
+//spotify api doesnt return genre tho
 //get all songs of a specific genre of a user liked and his playlist
 app.get("/songs/genre/:userid/:genreid", async (req, res) => {
   try {
@@ -1048,10 +946,10 @@ app.get("/playlists/:userid", async (req, res) => {
 app.get("/songs/most-liked", async (req, res) => {
   try {
     const query = `
-            SELECT s.id, s.stitle, s.sartist, s.sgenre, s.salbumid, s.srating, COUNT(t.userid) AS like_count
+            SELECT s.id, s.stitle, s.sgenre, s.salbumid, s.srating, COUNT(t.userid) AS like_count
             FROM TASTE t
             JOIN SONGS s ON t.songsid = s.id
-            GROUP BY s.id, s.stitle, s.sartist, s.sgenre, s.salbumid, s.srating
+            GROUP BY s.id, s.stitle, s.sgenre, s.salbumid, s.srating
             ORDER BY like_count DESC
         `;
 
@@ -1104,40 +1002,6 @@ app.get("/genres/most-popular", async (req, res) => {
       .status(500)
       .json({
         message: "Error fetching most popular genres",
-        error: error.message,
-      });
-  }
-});
-
-//get all songs of 1 users friends
-app.get("/songs/friends/:userid", async (req, res) => {
-  try {
-    const { userid } = req.params;
-
-    const query = `
-            SELECT DISTINCT s.id, s.stitle, s.sartist, s.sgenre, s.salbumid, s.srating 
-            FROM TASTE t
-            JOIN SONGS s ON t.songsid = s.id
-            WHERE t.userid IN (
-                SELECT user2 FROM FRIENDS WHERE user1 = @userid
-                UNION
-                SELECT user1 FROM FRIENDS WHERE user2 = @userid
-            ) and t.taste=1;
-        `;
-
-    const pool = await sql.connect(config);
-    const request = pool.request();
-    request.input("userid", sql.Int, userid);
-
-    const result = await request.query(query);
-
-    res.status(200).json(result.recordset);
-  } catch (error) {
-    console.error("Error fetching friends' liked songs:", error);
-    res
-      .status(500)
-      .json({
-        message: "Error fetching friends' liked songs",
         error: error.message,
       });
   }
@@ -1318,15 +1182,17 @@ app.get("/likedsongs", async (req, res) => {
                 s.id AS songsid, 
                 s.stitle,  
                 g.gname AS genre,
- STRING_AGG(a.aname, ', ') AS artist_name 
+ STRING_AGG(a.aname, ', ') AS artist_name , 
+alb.aname AS album_name
             FROM taste
             JOIN users u ON u.id = taste.userid
             JOIN songs s ON s.id = taste.songsid
             JOIN genre g ON s.sgenre = g.id
+            join album alb on alb.id=s.salbumid
             LEFT JOIN songsANDartist sa ON s.id = sa.songsid
             LEFT JOIN artist a ON sa.artistid = a.id
             WHERE u.uname = @name
-            GROUP BY s.id, s.stitle, g.gname;
+            GROUP BY s.id, s.stitle, g.gname, alb.aname;
         `;
 
     const pool = await sql.connect(config);
@@ -1557,8 +1423,7 @@ app.get("/friendssongs", async (req, res) => {
     }
 
     const query = `
-           SELECT 
-    distinct 
+           SELECT DISTINCT 
     s.id AS songid,
     s.stitle AS songtitle,
     g.gname AS genre,
@@ -1566,25 +1431,28 @@ app.get("/friendssongs", async (req, res) => {
     al.aname AS album_name,
     s.srating AS rating,
     s.simage AS image_url,
-    s.trackuri AS track_uri
-FROM TASTE t
+    s.trackuri AS track_uri,
+    t.userid AS friend_id  -- ✅ Identify which friend liked the song
+FROM FRIENDS f
+JOIN TASTE t ON (f.user1 = t.userid OR f.user2 = t.userid) 
 JOIN SONGS s ON t.songsid = s.id
 LEFT JOIN genre g ON s.sgenre = g.id
 LEFT JOIN album al ON s.salbumid = al.id
 LEFT JOIN songsANDartist sa ON s.id = sa.songsid
 LEFT JOIN artist a ON sa.artistid = a.id
-left join friends f on (f.user1 = t.userid OR f.user2 = t.userid)
-WHERE f.user1 = @userId OR f.user2 = @userId and 
- a.aname IS NOT NULL and t.userid <> @userId
+WHERE (f.user1 = @userId OR f.user2 = @userId) -- ✅ Get all friends of the user
+AND t.userid <> @userId  -- ✅ Exclude the user's own liked songs
+AND a.aname IS NOT NULL
 GROUP BY 
-   
     s.id,
     s.stitle,
     g.gname,
     al.aname,
     s.srating,
     s.simage,
-    s.trackuri;
+    s.trackuri,
+    t.userid;
+
             
 
         `;

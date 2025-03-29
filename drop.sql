@@ -19,14 +19,13 @@ create table USERS(
     and upassword like '%[a-z]%'
     AND upassword LIKE '%[@$!%*?&]%'
 )
-
 );
 
 create table artist(
     id int identity(1,1) primary key,
     aname varchar(255),
-    instagram varchar(255),
-   gender VARCHAR(20) CHECK (gender IN ('Male', 'Female', 'Non-binary', 'Other')),
+    --instagram varchar(255),
+   --gender VARCHAR(20) CHECK (gender IN ('Male', 'Female', 'Non-binary', 'Other')),
     monthlystreams bigint
 
 )
@@ -169,5 +168,34 @@ go
 
 select * from UserLikedSongsView
 
-           
+             SELECT 
+    distinct 
+    s.id AS songid,
+    s.stitle AS songtitle,
+    g.gname AS genre,
+    STRING_AGG(a.aname, ', ') AS artist_name,
+    al.aname AS album_name,
+    s.srating AS rating,
+    s.simage AS image_url,
+    s.trackuri AS track_uri
+FROM TASTE t
+JOIN SONGS s ON t.songsid = s.id
+LEFT JOIN genre g ON s.sgenre = g.id
+LEFT JOIN album al ON s.salbumid = al.id
+LEFT JOIN songsANDartist sa ON s.id = sa.songsid
+LEFT JOIN artist a ON sa.artistid = a.id
+left join friends f on (f.user1 = t.userid OR f.user2 = t.userid)
+WHERE f.user1 = 1002 OR f.user2 = 1002 and 
+ a.aname IS NOT NULL and t.userid <> 1002
+GROUP BY 
+   
+    s.id,
+    s.stitle,
+    g.gname,
+    al.aname,
+    s.srating,
+    s.simage,
+    s.trackuri;
+
+    
     

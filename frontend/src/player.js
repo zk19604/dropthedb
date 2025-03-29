@@ -102,13 +102,7 @@ async function getAccessToken(code) {
   return null;
 }
 
-// async function fetchProfile(token) {
-//   const result = await fetch("https://api.spotify.com/v1/me", {
-//     method: "GET",
-//     headers: { Authorization: `Bearer ${token}` },
-//   });
-//   return await result.json();
-// }
+
 async function fetchProfile(token) {
   const response = await fetch('https://api.spotify.com/v1/me', {
     headers: { 'Authorization': `Bearer ${token}` }
