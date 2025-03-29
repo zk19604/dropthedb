@@ -10,15 +10,15 @@ app.use(bodyParser.json());
 app.use(cors());
 
 const config = {
-  user: "Samee", 
-  password: "282000", 
-  server: "MASH_SQUAD",
-  database: "project",
-  options: {
-    encrypt: true, 
-    trustServerCertificate: true, 
-  },
-};
+    user: "sa", 
+    password: "Zainab.19", 
+    server: "localhost",
+    database: "project",
+    options: {
+      encrypt: true, 
+      trustServerCertificate: true, 
+    },
+  };
 
 
 async function connectDB() {

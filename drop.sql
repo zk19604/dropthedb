@@ -75,7 +75,7 @@ create table songsANDartist(
     constraint safk1 FOREIGN key (artistid)
     REFERENCES artist(id),
     constraint safk2 FOREIGN key (songsid)
-    REFERENCES songs(id),
+    REFERENCES songs(id)
 
 )
 create table TASTE(
