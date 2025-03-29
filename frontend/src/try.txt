@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 const clientId = "2cbadd009ef8428285512f390151a730";
 const clientSecret = "f8e498771c7f42f29fccfa9a72083555";
-const redirectUri = "http://localhost:3000/home";
+const redirectUri = "http://localhost:3000";
 
 const scopes = [
   "user-read-private",
@@ -22,8 +22,6 @@ const loginWithSpotify = () => {
 };
 
 async function getAccessToken(code) {
-  
-
   let accessToken = localStorage.getItem("access_token");
   let refreshToken = localStorage.getItem("refresh_token");
   let expiresAt = localStorage.getItem("expires_at");
@@ -164,13 +162,25 @@ async function pauseMusic(token) {
   });
 }
 
+async function nextTrack(token) {
+  await fetch("https://api.spotify.com/v1/me/player/next", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+async function previousTrack(token) {
+  await fetch("https://api.spotify.com/v1/me/player/previous", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
 
 async function searchSongs(token, query) {
   if (!query) return [];
 
-
   const result = await fetch(
-    `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=10`,
+    `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track`,
     {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
@@ -181,33 +191,8 @@ async function searchSongs(token, query) {
   return data.tracks.items || [];
 }
 
-const handlelike = async (songName, artistName, imageUrl, trackUri) => {
-    try {
-        const response = await fetch("http://localhost:5001/likes", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                stitle: songName,
-                trackUri: trackUri,
-                userId: localStorage.getItem("userId") 
-            }),
-        });
-        console.log(trackUri);
-        if (!response.ok) {
-            throw new Error("Failed to like the song");
-        }
 
-        const data = await response.json();
-        console.log("Song liked successfully:", data);
-    } catch (error) {
-        console.error("Error liking the song:", error);
-    }
-};
-
-
-function Player() {
+function App() {
     const [profile, setProfile] = useState(null);
     const [player, setPlayer] = useState(null);
     const [deviceId, setDeviceId] = useState(null);
@@ -216,7 +201,6 @@ function Player() {
     const [searchResults, setSearchResults] = useState([]);
   
     useEffect(() => {
-      
       async function fetchToken() {
         const params = new URLSearchParams(window.location.search);
         const code = params.get("code");
@@ -246,13 +230,18 @@ function Player() {
           <h1>Spotify Player</h1>
           {profile ? (
             <div>
-             
+              <h2>{profile.display_name}</h2>
+              {profile.images?.[0] && <img src={profile.images[0].url} alt="Profile" width={200} />}
+              <p>Email: {profile.email}</p>
     
               {deviceId ? (
                 <div>
-                 
+                  <button onClick={() => playMusic(token, deviceId, "spotify:track:6rqhFgbbKwnb9MLmUQDhG6")}>
+                    ▶️ Play Song
+                  </button>
                   <button onClick={() => pauseMusic(token)}>⏸ Pause</button>
-                 
+                  <button onClick={() => nextTrack(token)}>⏭ Next</button>
+                  <button onClick={() => previousTrack(token)}>⏮ Previous</button>
                 </div>
               ) : (
                 <p>Loading player...</p>
@@ -270,7 +259,6 @@ function Player() {
               </form>
   
               
-              
                {searchResults.length > 0 && (
                 <div>
                   <h3>Search Results:</h3>
@@ -286,12 +274,6 @@ function Player() {
                       >
                         ▶️ Play
                       </button>
-                      <button 
-                        onClick={() => handlelike(track.name, track.artists.map(artist => artist.name).join(", "),track.album.images[0]?.url,track.uri)} 
-                        style={{ marginLeft: "10px" }}
-                      >
-                        Like
-                      </button>
                     </div>
                   ))}
                     </div>
@@ -304,4 +286,5 @@ function Player() {
       );
     }
     
-    export default Player;
+    export default App;
+  

@@ -13,19 +13,26 @@ const Login = () => {
 
         try {
             const response = await fetch("http://localhost:5001/login", {
-                method: "POST", // ✅ Use POST for security
+                method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ uemail: email, upassword: password }) // ✅ Send data in body
+                body: JSON.stringify({ uemail: email, upassword: password })
             });
 
             const data = await response.json();
 
             if (data.success) {
                 console.log(data);
-                localStorage.setItem("username", data.user.uname); // Store user info
-                localStorage.setItem("userId", data.user.id); // Store user ID if needed
-                console.log("Navigating to Home...");
-                navigate("/home"); // ✅ Redirect to home page
+                localStorage.setItem("username", data.user.uname);
+                localStorage.setItem("userId", data.user.id);
+                localStorage.setItem("isAdmin", data.user.u_type);
+
+                if (data.user.u_type === "a") {
+                    console.log("Navigating to Admin Home...");
+                    navigate("/adminhome");
+                } else {
+                    console.log("Navigating to Home...");
+                    navigate("/home");
+                }
             } else {
                 setError(data.message);
             }
@@ -60,7 +67,6 @@ const Login = () => {
             <a href="/signup">Sign up</a>
         
         </div>
-        
     );
 };
 

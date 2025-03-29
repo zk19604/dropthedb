@@ -18,6 +18,7 @@ create table USERS(
     uage int not null check(uage>=13), 
     ucountry varchar(255) not NULL,
     u_created DATETIME DEFAULT GETDATE(),
+	u_type char default('u'),
    constraint uchk1 check (
     LEN(upassword) >= 8  
     AND upassword LIKE '%[0-9]%'  
@@ -57,8 +58,8 @@ create table SONGS(
     stitle varchar(255) not null,
     sgenre int ,
     salbumid int, 
-    srating float check(srating BETWEEN 0 AND 100), --popularity score given by api
-    simage varchar(500), --spotify provides url
+    srating float check(srating BETWEEN 1 AND 5), 
+    simage VARBINARY(MAX),
     trackuri varchar(255),
     constraint sfk2 FOREIGN key (sgenre)
     REFERENCES genre(id),
@@ -136,10 +137,9 @@ use project;
 go
 
 
-
 go
 CREATE VIEW PlaylistSongsView AS
-SELECT ps.playlistid as playlistid, s.id AS songid, s.stitle as songtitle,  s.sgenre as genre , s.salbumid as album, s.srating as rating
+SELECT ps.playlistid, s.id AS songid, s.stitle,  s.sgenre, s.salbumid, s.srating
 FROM PLAYLIST_S ps
 INNER JOIN SONGS s ON ps.songsid = s.id;
 go
@@ -149,3 +149,15 @@ go
             JOIN USERS u ON 
                 (f.user1 = 1 AND u.id = f.user2) OR 
                 (f.user2 = 1 AND u.id = f.user1)
+GO
+CREATE VIEW UserLikedSongsView AS
+SELECT u.id AS user_id, u.uname, s.id AS song_id, s.stitle, g.gname AS genre
+FROM TASTE t
+JOIN USERS u ON t.userid = u.id
+JOIN SONGS s ON t.songsid = s.id
+JOIN GENRE g ON s.sgenre = g.id;
+go
+
+--example admin
+insert into users(uname,uemail,upassword,uage,ucountry,u_created,u_type)
+values ('haziq','haziqk12211@gmail.com','12345678Aa!',30,'Waganda',getdate(),'a');
