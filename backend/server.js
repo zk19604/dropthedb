@@ -12,7 +12,7 @@ app.use(cors());
 
 const config = {
   user: "sa",
-  password: "Zainab.19",
+  password: "dd84b5aS@",
   server: "localhost",
   database: "project",
   options: {
@@ -1189,14 +1189,10 @@ app.post("/likes", async (req, res) => {
 
     let genreId = genreResult.recordset.length
       ? genreResult.recordset[0].id
-      : (
-          await pool
-            .request()
-            .input("genrename", sql.VarChar, genrename)
-            .query(
-              "INSERT INTO GENRE (gname) OUTPUT INSERTED.id VALUES (@genrename)"
-            )
-        ).recordset[0].id;
+      : (await pool.request()
+        .input("genrename", sql.VarChar, genrename)
+        .query("INSERT INTO GENRE (gname) OUTPUT INSERTED.id VALUES (@genrename)")
+      ).recordset[0].id;
 
     // 2️⃣ **Insert Album if not exists**
     let albumResult = await pool
@@ -1206,14 +1202,10 @@ app.post("/likes", async (req, res) => {
 
     let albumId = albumResult.recordset.length
       ? albumResult.recordset[0].id
-      : (
-          await pool
-            .request()
-            .input("albumname", sql.VarChar, albumname)
-            .query(
-              "INSERT INTO ALBUM (aname) OUTPUT INSERTED.id VALUES (@albumname)"
-            )
-        ).recordset[0].id;
+      : (await pool.request()
+        .input("albumname", sql.VarChar, albumname)
+        .query("INSERT INTO ALBUM (aname) OUTPUT INSERTED.id VALUES (@albumname)")
+      ).recordset[0].id;
 
     // 3️⃣ **Check if song exists**
     let songResult = await pool
@@ -1223,20 +1215,19 @@ app.post("/likes", async (req, res) => {
 
     let songId = songResult.recordset.length
       ? songResult.recordset[0].id
-      : (
-          await pool
-            .request()
-            .input("stitle", sql.VarChar, stitle)
-            .input("trackUri", sql.VarChar, trackUri)
-            .input("genreId", sql.Int, genreId)
-            .input("albumId", sql.Int, albumId)
-            .input("rating", sql.Float, rating || 0)
-            .input("simage", sql.VarChar, simage).query(`
+      : (await pool.request()
+        .input("stitle", sql.VarChar, stitle)
+        .input("trackUri", sql.VarChar, trackUri)
+        .input("genreId", sql.Int, genreId)
+        .input("albumId", sql.Int, albumId)
+        .input("rating", sql.Float, rating || 0)
+        .input("simage", sql.VarChar, simage)
+        .query(`
                     INSERT INTO SONGS (stitle, trackuri, sgenre, salbumid, srating, simage)
                     OUTPUT INSERTED.id
                     VALUES (@stitle, @trackUri, @genreId, @albumId, @rating, @simage)
                 `)
-        ).recordset[0].id;
+      ).recordset[0].id;
 
     // 4️⃣ **Insert Artists and Link to Song**
     for (let artistName of authornames) {
@@ -1247,14 +1238,10 @@ app.post("/likes", async (req, res) => {
 
       let artistId = artistResult.recordset.length
         ? artistResult.recordset[0].id
-        : (
-            await pool
-              .request()
-              .input("artistName", sql.VarChar, artistName)
-              .query(
-                "INSERT INTO ARTIST (aname) OUTPUT INSERTED.id VALUES (@artistName)"
-              )
-          ).recordset[0].id;
+        : (await pool.request()
+          .input("artistName", sql.VarChar, artistName)
+          .query("INSERT INTO ARTIST (aname) OUTPUT INSERTED.id VALUES (@artistName)")
+        ).recordset[0].id;
 
       // ✅ **Check if song-artist link exists before inserting**
       let linkCheck = await pool
@@ -1605,30 +1592,30 @@ GROUP BY
 });
 
 app.delete("/removefriend", async (req, res) => {
-    try {
-        const { userId, friendId } = req.body; // Get userId and friendId from request body
+  try {
+    const { userId, friendId } = req.body; // Get userId and friendId from request body
 
-        if (!userId || !friendId) {
-            return res.status(400).json({ message: "Both User ID and Friend ID are required" });
-        }
+    if (!userId || !friendId) {
+      return res.status(400).json({ message: "Both User ID and Friend ID are required" });
+    }
 
-        const query = `
+    const query = `
             DELETE FROM FRIENDS
             WHERE (user1 = @userId AND user2 = @friendId) 
                OR (user1 = @friendId AND user2 = @userId);
         `;
 
-        const pool = await sql.connect(config);
-        await pool.request()
-            .input("userId", sql.Int, userId)
-            .input("friendId", sql.Int, friendId)
-            .query(query);
+    const pool = await sql.connect(config);
+    await pool.request()
+      .input("userId", sql.Int, userId)
+      .input("friendId", sql.Int, friendId)
+      .query(query);
 
-        res.status(200).json({ message: "Friend removed successfully" });
-    } catch (error) {
-        console.error("Error removing friend:", error);
-        res.status(500).json({ message: "Error removing friend", error: error.message });
-    }
+    res.status(200).json({ message: "Friend removed successfully" });
+  } catch (error) {
+    console.error("Error removing friend:", error);
+    res.status(500).json({ message: "Error removing friend", error: error.message });
+  }
 });
 
 
