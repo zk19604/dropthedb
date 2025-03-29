@@ -102,7 +102,6 @@ async function getAccessToken(code) {
   return null;
 }
 
-
 // async function fetchProfile(token) {
 //   const result = await fetch("https://api.spotify.com/v1/me", {
 //     method: "GET",
@@ -186,9 +185,29 @@ async function searchSongs(token, query) {
   );
 
   const data = await result.json();
-  console.log(data);
-  return data.tracks.items || [];
+
+  if (!data.tracks || !data.tracks.items) {
+    console.log("No tracks found.");
+    return [];
+  }
+
+  // Extract and log song details
+  data.tracks.items.forEach(track => {
+    console.log("Song Name:", track.name);
+    console.log("Artists:", track.artists.map(artist => artist.name).join(", "));
+    console.log("Album Name:", track.album.name);
+    console.log("Album Cover:", track.album.images[0]?.url);
+    console.log("Duration (ms):", track.duration_ms);
+    console.log("Explicit:", track.explicit ? "Yes" : "No");
+    console.log("Popularity:", track.popularity);
+    console.log("Preview URL:", track.preview_url || "No preview available");
+    console.log("Spotify URI:", track.uri);
+    console.log("----------------------------");
+  });
+
+  return data.tracks.items;
 }
+
 
 function Player() {
   const [profile, setProfile] = useState(null);
@@ -210,12 +229,15 @@ function Player() {
         const userProfile = await fetchProfile(token);
         setProfile(userProfile);
         initializeSpotifyPlayer(token, setPlayer, setDeviceId);
+
       } else {
         console.error("Failed to get access token");
       }
     }
     fetchToken();
   }, [token]);
+
+
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -301,7 +323,9 @@ function Player() {
               ))}
             </div>
           )}
+
         </div>
+
       ) : (
         <button onClick={loginWithSpotify}>Login with Spotify</button>
       )}

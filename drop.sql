@@ -126,12 +126,38 @@ select * from artist
 select * from genre 
 select * from friends
 
-
-
 go
 CREATE VIEW PlaylistSongsView AS
 SELECT ps.playlistid, s.id AS songid, s.stitle,  s.sgenre, s.salbumid, s.srating
 FROM PLAYLIST_S ps
 INNER JOIN SONGS s ON ps.songsid = s.id;
 go
+
+CREATE OR ALTER VIEW UserLikedSongsView AS
+SELECT 
+    t.userid,
+    s.id AS songid,
+    s.stitle AS songtitle,
+    g.gname AS genre,
+    STRING_AGG(a.aname, ', ') AS artist_name,
+    al.aname AS album_name,
+    s.srating AS rating,
+    s.simage AS image_url,
+    s.trackuri AS track_uri
+FROM TASTE t
+JOIN SONGS s ON t.songsid = s.id
+LEFT JOIN genre g ON s.sgenre = g.id
+LEFT JOIN album al ON s.salbumid = al.id
+LEFT JOIN songsANDartist sa ON s.id = sa.songsid
+LEFT JOIN artist a ON sa.artistid = a.id
+WHERE a.aname IS NOT NULL 
+GROUP BY 
+    t.userid,
+    s.id,
+    s.stitle,
+    g.gname,
+    al.aname,
+    s.srating,
+    s.simage,
+    s.trackuri;
 

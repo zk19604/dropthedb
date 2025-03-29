@@ -12,7 +12,7 @@ app.use(cors());
 
 const config = {
     user: "sa",
-    password: "Zainab.19",
+    password: "dd84b5aS@",
     server: "localhost",
     database: "project",
     options: {
