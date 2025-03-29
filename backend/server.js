@@ -1106,12 +1106,13 @@ app.get("/users", async (req, res) => {
 });
 
 app.post("/likes", async (req, res) => {
+    let transaction;
     try {
         const { stitle, genrename, albumname, rating, simage, trackUri, userId, authornames } = req.body;
         console.log("Liking song:", stitle, "for user:", userId);
 
         const pool = await sql.connect(config);
-        let transaction = new sql.Transaction(pool);
+        transaction = new sql.Transaction(pool);
         await transaction.begin();
 
         // 1️⃣ **Insert Genre if not exists**
@@ -1120,16 +1121,12 @@ app.post("/likes", async (req, res) => {
             .input("genrename", sql.VarChar, genrename)
             .query("SELECT id FROM GENRE WHERE gname = @genrename");
 
-        let genreId;
-        if (genreResult.recordset.length === 0) {
-            let insertGenre = await pool
-                .request()
+        let genreId = genreResult.recordset.length 
+            ? genreResult.recordset[0].id 
+            : (await pool.request()
                 .input("genrename", sql.VarChar, genrename)
-                .query("INSERT INTO GENRE (gname) OUTPUT INSERTED.id VALUES (@genrename)");
-            genreId = insertGenre.recordset[0].id;
-        } else {
-            genreId = genreResult.recordset[0].id;
-        }
+                .query("INSERT INTO GENRE (gname) OUTPUT INSERTED.id VALUES (@genrename)")
+            ).recordset[0].id;
 
         // 2️⃣ **Insert Album if not exists**
         let albumResult = await pool
@@ -1137,16 +1134,12 @@ app.post("/likes", async (req, res) => {
             .input("albumname", sql.VarChar, albumname)
             .query("SELECT id FROM ALBUM WHERE aname = @albumname");
 
-        let albumId;
-        if (albumResult.recordset.length === 0) {
-            let insertAlbum = await pool
-                .request()
+        let albumId = albumResult.recordset.length 
+            ? albumResult.recordset[0].id 
+            : (await pool.request()
                 .input("albumname", sql.VarChar, albumname)
-                .query("INSERT INTO ALBUM (aname) OUTPUT INSERTED.id VALUES (@albumname)");
-            albumId = insertAlbum.recordset[0].id;
-        } else {
-            albumId = albumResult.recordset[0].id;
-        }
+                .query("INSERT INTO ALBUM (aname) OUTPUT INSERTED.id VALUES (@albumname)")
+            ).recordset[0].id;
 
         // 3️⃣ **Check if song exists**
         let songResult = await pool
@@ -1154,11 +1147,9 @@ app.post("/likes", async (req, res) => {
             .input("trackUri", sql.VarChar, trackUri)
             .query("SELECT id FROM SONGS WHERE trackuri = @trackUri");
 
-        let songId;
-        if (songResult.recordset.length === 0) {
-            // 4️⃣ **Insert Song**
-            let insertSong = await pool
-                .request()
+        let songId = songResult.recordset.length 
+            ? songResult.recordset[0].id 
+            : (await pool.request()
                 .input("stitle", sql.VarChar, stitle)
                 .input("trackUri", sql.VarChar, trackUri)
                 .input("genreId", sql.Int, genreId)
@@ -1166,54 +1157,67 @@ app.post("/likes", async (req, res) => {
                 .input("rating", sql.Float, rating || 0)
                 .input("simage", sql.VarChar, simage)
                 .query(`
-                    INSERT INTO SONGS (stitle, trackuri, sgenre, salbumid, srating, simage) 
+                    INSERT INTO SONGS (stitle, trackuri, sgenre, salbumid, srating, simage)
                     OUTPUT INSERTED.id
                     VALUES (@stitle, @trackUri, @genreId, @albumId, @rating, @simage)
-                `);
-            songId = insertSong.recordset[0].id;
-        } else {
-            songId = songResult.recordset[0].id;
-        }
+                `)
+            ).recordset[0].id;
 
-        // 5️⃣ **Insert Artists and Link to Song**
+        // 4️⃣ **Insert Artists and Link to Song**
         for (let artistName of authornames) {
             let artistResult = await pool
                 .request()
                 .input("artistName", sql.VarChar, artistName)
                 .query("SELECT id FROM ARTIST WHERE aname = @artistName");
 
-            let artistId;
-            if (artistResult.recordset.length === 0) {
-                let insertArtist = await pool
-                    .request()
+            let artistId = artistResult.recordset.length 
+                ? artistResult.recordset[0].id 
+                : (await pool.request()
                     .input("artistName", sql.VarChar, artistName)
-                    .query("INSERT INTO ARTIST (aname) OUTPUT INSERTED.id VALUES (@artistName)");
-                artistId = insertArtist.recordset[0].id;
-            } else {
-                artistId = artistResult.recordset[0].id;
-            }
+                    .query("INSERT INTO ARTIST (aname) OUTPUT INSERTED.id VALUES (@artistName)")
+                ).recordset[0].id;
 
-            // Link song to artist in `songsANDartist`
-            await pool
+            // ✅ **Check if song-artist link exists before inserting**
+            let linkCheck = await pool
                 .request()
                 .input("songId", sql.Int, songId)
                 .input("artistId", sql.Int, artistId)
-                .query("INSERT INTO songsANDartist (songsid, artistid) VALUES (@songId, @artistId)");
+                .query("SELECT 1 FROM songsANDartist WHERE songsid = @songId AND artistid = @artistId");
+
+            if (linkCheck.recordset.length === 0) {
+                await pool
+                    .request()
+                    .input("songId", sql.Int, songId)
+                    .input("artistId", sql.Int, artistId)
+                    .query("INSERT INTO songsANDartist (songsid, artistid) VALUES (@songId, @artistId)");
+            }
         }
 
-        // 6️⃣ **Insert into TASTE table (Liked Songs)**
-        await pool
+        // 5️⃣ **Insert into TASTE table (Liked Songs)**
+        let tasteCheck = await pool
             .request()
             .input("userId", sql.Int, userId)
             .input("songId", sql.Int, songId)
-            .query("INSERT INTO TASTE (userid, songsid) VALUES (@userId, @songId)");
+            .query("SELECT 1 FROM TASTE WHERE userid = @userId AND songsid = @songId");
+
+        if (tasteCheck.recordset.length === 0) {
+            await pool
+                .request()
+                .input("userId", sql.Int, userId)
+                .input("songId", sql.Int, songId)
+                .query("INSERT INTO TASTE (userid, songsid) VALUES (@userId, @songId)");
+        } else {
+            return res.status(400).json({ message: "Song already liked!" });
+        }
 
         await transaction.commit();
         res.status(200).json({ message: "Song liked successfully!" });
 
     } catch (error) {
         console.error("Error liking song:", error);
-        await transaction.rollback();
+        if (transaction) {
+            await transaction.rollback();
+        }
         res.status(500).json({ message: "Error liking song", error: error.message });
     }
 });
