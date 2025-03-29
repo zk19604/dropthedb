@@ -1,19 +1,15 @@
 import React from "react";
-import Player from "./player";
 import User from "./User";
-import Liked from "./Liked";
 
-function Home() {
+function AdminHome() {
   const username = localStorage.getItem("username"); // ✅ Get username from localStorage
   const userid = localStorage.getItem("userId")
   return (
     <div >
+        <h1>Admin</h1>
       <User searchName={username} />  
-      <Player />
-      <Liked uname={username} /> 
-     <a href="/delete">Tired of us? wanna delete?</a>
     </div>
   );
 }
 
-export default Home;
+export default AdminHome;

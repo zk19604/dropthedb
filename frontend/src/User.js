@@ -50,6 +50,7 @@ function User({ searchName }) {
             <strong>Age:</strong> {user.uage} <br />
             <strong>Country:</strong> {user.ucountry} <br />
             <strong>Created At:</strong> {user.u_created} <br />
+            <strong>Type:</strong>{user.u_type}<br/>
             <hr />
           </li>
         ))}
