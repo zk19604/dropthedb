@@ -2,7 +2,8 @@ const express = require("express");
 const sql = require("mssql");
 const bodyParser = require("body-parser");
 const cors = require('cors');
-
+const crypto = require("crypto");
+console.log(crypto.randomBytes(16).toString("hex"));
 const app = express();
 const port = 5001;
 
@@ -10,14 +11,14 @@ app.use(bodyParser.json());
 app.use(cors());
 
 const config = {
-  user: "Samee", 
-  password: "282000", 
-  server: "MASH_SQUAD",
-  database: "project",
-  options: {
-    encrypt: true, 
-    trustServerCertificate: true, 
-  },
+    user: "sa",
+    password: "Zainab.19",
+    server: "localhost",
+    database: "project",
+    options: {
+        encrypt: true,
+        trustServerCertificate: true,
+    },
 };
 
 
@@ -66,8 +67,8 @@ app.post("/genre", async (req, res) => {
             request.input(`gname${index}`, sql.VarChar, gname);
         });
 
-//insert multiple genres at once via json like :{"genres": ["Rock", "Pop", "Jazz", "Hip-Hop"]}
-//can also insert just one via: {"genres": ["Electronic"]}
+        //insert multiple genres at once via json like :{"genres": ["Rock", "Pop", "Jazz", "Hip-Hop"]}
+        //can also insert just one via: {"genres": ["Electronic"]}
 
 
         await request.query(query);
@@ -132,8 +133,8 @@ app.delete("/genre", async (req, res) => {
             request.input(`id${index}`, sql.Int, id);
         });
 
-//delete multiple genres at once via json like :{"ids": [ 1 , 2 , 3 ]}
-//can also delete just one via: {"ids": [4]}
+        //delete multiple genres at once via json like :{"ids": [ 1 , 2 , 3 ]}
+        //can also delete just one via: {"ids": [4]}
 
 
         const result = await request.query(query);
@@ -895,7 +896,7 @@ app.post("/login", async (req, res) => {
         const result = await request.query(query);
 
         if (result.recordset.length > 0) {
-            res.status(200).json({ success: true,message: "Login successful", user: result.recordset[0] });
+            res.status(200).json({ success: true, message: "Login successful", user: result.recordset[0] });
         } else {
             res.status(401).json({ message: "Invalid email or password" });
         }
@@ -911,7 +912,7 @@ app.get("/songs/genre/:userid/:genreid", async (req, res) => {
         const { userid, genreid } = req.params;
 
         if (!userid || !genreid) {
-            return res.status(400).json({  message: "User ID and Genre ID are required" });
+            return res.status(400).json({ message: "User ID and Genre ID are required" });
         }
 
         const query = `
@@ -1218,7 +1219,6 @@ app.post("/likes", async (req, res) => {
     }
 });
 
-
 //liked songs
 app.get("/likedsongs", async (req, res) => {
     try {
@@ -1228,7 +1228,8 @@ app.get("/likedsongs", async (req, res) => {
             SELECT 
                 s.id AS songsid, 
                 s.stitle,  
-                g.gname AS genre 
+                g.gname AS genre,
+ STRING_AGG(a.aname, ', ') AS artist_name 
             FROM taste
             JOIN users u ON u.id = taste.userid
             JOIN songs s ON s.id = taste.songsid
@@ -1356,9 +1357,6 @@ app.get("/playlist-songs-by-genre", async (req, res) => {
         res.status(500).json({ message: "Error fetching playlist songs by genre", error: error.message });
     }
 });
-
-
-
 app.listen(port, () => {
     console.log(` Server running on http://localhost:${port}`);
 });

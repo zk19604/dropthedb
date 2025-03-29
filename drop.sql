@@ -1,11 +1,4 @@
 
-go 
-use master 
-go 
-drop database project 
-go
-create database project
-go
 use project; 
 go
 
@@ -134,6 +127,7 @@ select * from genre
 select * from friends
 
 
+
 go
 CREATE VIEW PlaylistSongsView AS
 SELECT ps.playlistid, s.id AS songid, s.stitle,  s.sgenre, s.salbumid, s.srating
@@ -141,15 +135,3 @@ FROM PLAYLIST_S ps
 INNER JOIN SONGS s ON ps.songsid = s.id;
 go
 
-GO
-CREATE VIEW UserLikedSongsView AS
-SELECT u.id AS user_id, u.uname, s.id AS song_id, s.stitle, g.gname AS genre
-FROM TASTE t
-JOIN USERS u ON t.userid = u.id
-JOIN SONGS s ON t.songsid = s.id
-JOIN GENRE g ON s.sgenre = g.id;
-go
-
---example admin
-insert into users(uname,uemail,upassword,uage,ucountry,u_created,u_type)
-values ('haziq','haziqk12211@gmail.com','12345678Aa!',30,'Waganda',getdate(),'a');
