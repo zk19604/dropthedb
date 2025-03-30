@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { handlelike } from "./Liked";
-import { handleplaylist } from "./Playlist"
+import { handleplaylist } from "./Playlist";
 const clientId = "2cbadd009ef8428285512f390151a730";
 const clientSecret = "f8e498771c7f42f29fccfa9a72083555";
 const redirectUri = "http://localhost:3000/home";
@@ -23,8 +23,6 @@ const loginWithSpotify = () => {
 };
 
 async function getAccessToken(code) {
-
-
   let accessToken = localStorage.getItem("access_token");
   let refreshToken = localStorage.getItem("refresh_token");
   let expiresAt = localStorage.getItem("expires_at");
@@ -102,13 +100,12 @@ async function getAccessToken(code) {
   return null;
 }
 
-
 async function fetchProfile(token) {
-  const response = await fetch('https://api.spotify.com/v1/me', {
-    headers: { 'Authorization': `Bearer ${token}` }
+  const response = await fetch("https://api.spotify.com/v1/me", {
+    headers: { Authorization: `Bearer ${token}` },
   });
   const profile = await response.json();
-  console.log('Spotify Profile:', profile);
+  console.log("Spotify Profile:", profile);
   return profile;
 }
 async function initializeSpotifyPlayer(token, setPlayer, setDeviceId) {
@@ -147,16 +144,18 @@ async function initializeSpotifyPlayer(token, setPlayer, setDeviceId) {
 //device id where the music will play
 //track uri, spotify uri of the track to play
 async function playMusic(token, deviceId, trackUri) {
-  await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
-    method: "PUT",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ uris: [trackUri] }),
-  });
+  await fetch(
+    `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
+    {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ uris: [trackUri] }),
+    }
+  );
 }
-
 
 async function pauseMusic(token) {
   await fetch("https://api.spotify.com/v1/me/player/pause", {
@@ -165,13 +164,13 @@ async function pauseMusic(token) {
   });
 }
 
-
 async function searchSongs(token, query) {
   if (!query) return [];
 
-
   const result = await fetch(
-    `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=10`,
+    `https://api.spotify.com/v1/search?q=${encodeURIComponent(
+      query
+    )}&type=track&limit=10`,
     {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
@@ -186,9 +185,12 @@ async function searchSongs(token, query) {
   }
 
   // Extract and log song details
-  data.tracks.items.forEach(track => {
+  data.tracks.items.forEach((track) => {
     console.log("Song Name:", track.name);
-    console.log("Artists:", track.artists.map(artist => artist.name).join(", "));
+    console.log(
+      "Artists:",
+      track.artists.map((artist) => artist.name).join(", ")
+    );
     console.log("Album Name:", track.album.name);
     console.log("Album Cover:", track.album.images[0]?.url);
     console.log("Duration (ms):", track.duration_ms);
@@ -202,6 +204,36 @@ async function searchSongs(token, query) {
   return data.tracks.items;
 }
 
+export const addToSongs = async (songName, artistNames, imageUrl, trackUri, album, genre, rating) => {
+  try {
+      const response = await fetch("http://localhost:5001/addsong", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+              stitle: songName,
+              trackUri: trackUri,
+              authornames: artistNames, // Array of artists
+              genrename: genre,
+              albumname: album,
+              albumname: album,
+              rating: rating,
+              simage: imageUrl,
+              userId: localStorage.getItem("userId"),
+          }),
+      });
+
+      if (!response.ok) {
+          throw new Error("Failed to add the song");
+      }
+
+      console.log("Song added successfully");
+
+  } catch (error) {
+      console.error("Error adding the song:", error);
+  }
+};
 
 function Player() {
   const [profile, setProfile] = useState(null);
@@ -212,7 +244,6 @@ function Player() {
   const [searchResults, setSearchResults] = useState([]);
 
   useEffect(() => {
-
     async function fetchToken() {
       const params = new URLSearchParams(window.location.search);
       const code = params.get("code");
@@ -223,15 +254,12 @@ function Player() {
         const userProfile = await fetchProfile(token);
         setProfile(userProfile);
         initializeSpotifyPlayer(token, setPlayer, setDeviceId);
-
       } else {
         console.error("Failed to get access token");
       }
     }
     fetchToken();
   }, [token]);
-
-
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -284,11 +312,25 @@ function Player() {
                     {track.artists.map((artist) => artist.name).join(", ")}
                   </div>
                   <button
-                    onClick={() => playMusic(token, deviceId, track.uri)}
+                    onClick={() => {
+                      playMusic(token, deviceId, track.uri); // ✅ First function
+                      addToSongs(
+                        track.name,
+                        track.artists.map((artist) => artist.name), // ✅ Pass an array of artist names
+                        track.album.images[0]?.url, // ✅ Pass album image URL
+                        track.uri,
+                        track.album.name, // ✅ Pass album name correctly
+                        track.artists[0]?.genres
+                          ? track.artists[0].genres[0]
+                          : "Unknown", // ✅ Handle missing genre
+                        track.popularity
+                      );
+                    }}
                     style={{ marginLeft: "10px" }}
                   >
                     ▶️ Play
                   </button>
+
                   <button
                     onClick={() =>
                       handlelike(
@@ -297,7 +339,9 @@ function Player() {
                         track.album.images[0]?.url, // ✅ Pass album image URL
                         track.uri,
                         track.album.name, // ✅ Pass album name correctly
-                        track.artists[0]?.genres ? track.artists[0].genres[0] : "Unknown", // ✅ Handle missing genre
+                        track.artists[0]?.genres
+                          ? track.artists[0].genres[0]
+                          : "Unknown", // ✅ Handle missing genre
                         track.popularity // ✅ Using Spotify's popularity rating as a rating
                       )
                     }
@@ -306,9 +350,15 @@ function Player() {
                     Like
                   </button>
 
-
                   <button
-                    onClick={() => handleplaylist(track.name, track.artists.map(artist => artist.name).join(", "), track.album.images[0]?.url, track.uri)}
+                    onClick={() =>
+                      handleplaylist(
+                        track.name,
+                        track.artists.map((artist) => artist.name).join(", "),
+                        track.album.images[0]?.url,
+                        track.uri
+                      )
+                    }
                     style={{ marginLeft: "10px" }}
                   >
                     Add to playlist
@@ -317,9 +367,7 @@ function Player() {
               ))}
             </div>
           )}
-
         </div>
-
       ) : (
         <button onClick={loginWithSpotify}>Login with Spotify</button>
       )}
