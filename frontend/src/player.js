@@ -115,87 +115,52 @@ async function fetchProfile(token) {
 }
 
 async function initializeSpotifyPlayer(token, setPlayer, setDeviceId) {
+  //web player sdk
   const script = document.createElement("script");
   script.src = "https://sdk.scdn.co/spotify-player.js";
   script.async = true;
   document.body.appendChild(script);
 
-  script.onload = () => {
-    console.log("Spotify Web Playback SDK Loaded");
-    window.onSpotifyWebPlaybackSDKReady = () => {
-      const player = new window.Spotify.Player({
-        name: "My Web Player",
-        getOAuthToken: (cb) => cb(token),
-        volume: 0.5,
-      });
+  //initialise the spotify player
+  window.onSpotifyWebPlaybackSDKReady = () => {
+    const player = new window.Spotify.Player({
+      name: "My Web Player",
+      getOAuthToken: (cb) => cb(token),
+      volume: 0.5,
+    });
 
-      player.addListener("ready", ({ device_id }) => {
-        console.log("✅ Spotify Player Ready, Device ID:", device_id);
-        setDeviceId(device_id);
-      });
+    //for play
+    player.addListener("ready", ({ device_id }) => {
+      console.log("Ready with Device ID", device_id);
+      setDeviceId(device_id);
+    });
 
-      player.addListener("not_ready", ({ device_id }) => {
-        console.warn("⚠️ Spotify Player Not Ready, Device ID:", device_id);
-      });
+    player.addListener("not_ready", ({ device_id }) => {
+      console.log("Device ID has gone offline", device_id);
+    });
 
-      player.addListener("initialization_error", ({ message }) => {
-        console.error("❌ Initialization Error:", message);
-      });
-
-      player.addListener("authentication_error", ({ message }) => {
-        console.error("❌ Authentication Error:", message);
-      });
-
-      player.addListener("account_error", ({ message }) => {
-        console.error("❌ Account Error:", message);
-      });
-
-      player.connect().then((success) => {
-        if (success) {
-          console.log("🎵 Connected to Spotify Player!");
-          setPlayer(player);
-        } else {
-          console.error("❌ Failed to connect Spotify Player.");
-        }
-      });
-    };
+    //connect the player to spotify
+    player.connect();
+    setPlayer(player);
   };
 }
+
 
 
 
 //token for spotfiy access
 //device id where the music will play
 //track uri, spotify uri of the track to play
-export const playMusic = async (token, deviceId, uri) => {
-  if (!deviceId) {
-    console.error("Error: Device ID is undefined");
-    return;
-  }
-
-  if (!token) {
-    console.error("Error: Spotify token is missing or expired");
-    return;
-  }
-
-  try {
-    const response = await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
-      method: "PUT",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ uris: [uri] })
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Spotify API Error:", errorData);
-    }
-  } catch (error) {
-    console.error("Error playing song:", error);
-  }
-};
+export async function playMusic(token, deviceId, trackUri) {
+  await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ uris: [trackUri] }),
+  });
+}
 
 
 async function pauseMusic(token) {
@@ -317,15 +282,14 @@ function Player() {
         // const userProfile = await fetchProfile(accessToken); // ✅ Use new token
         const userProfile = await fetchProfile(token);
         setProfile(userProfile);
-        setUserId(userProfile.id);
-        initializeSpotifyPlayer(token, setPlayer, setDeviceId); // ✅ Use new token
+        initializeSpotifyPlayer(token, setPlayer, setDeviceId);
+
       } else {
         console.error("Failed to get access token");
       }
     }
-
-    if (!token) fetchToken();
-  }, []);
+    fetchToken();
+  }, [token]);
 
 
 
