@@ -12,6 +12,7 @@ function Home() {
   return (
     <div>
       <User searchName={username} />  
+      <a href="/AI">get ai recommendations</a>
       <Friends />
       <Playlist/>
       <Player />
