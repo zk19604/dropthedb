@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 
 export const handlelike = async (songName, artistNames, imageUrl, trackUri, album, genre, rating) => {
@@ -12,6 +13,7 @@ export const handlelike = async (songName, artistNames, imageUrl, trackUri, albu
                 trackUri: trackUri,
                 authornames: artistNames, // Array of artists
                 genrename: genre,
+                albumname: album,
                 albumname: album,
                 rating: rating,
                 simage: imageUrl,
@@ -30,13 +32,14 @@ export const handlelike = async (songName, artistNames, imageUrl, trackUri, albu
     }
 };
 
-
 const Liked = () => {
     const [likedSongs, setLikedSongs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const uname = localStorage.getItem("username"); // ✅ Get username inside component
     const userid = localStorage.getItem("userId");
+
+
 
     // ✅ Define fetchLikedSongs inside Liked so we can update state
     const fetchLikedSongs = async () => {
@@ -46,6 +49,7 @@ const Liked = () => {
                 throw new Error("Failed to fetch liked songs");
             }
             const data = await response.json();
+            console.log("liked songs:", data);
             setLikedSongs(data);
         } catch (error) {
             setError(error.message);
@@ -55,9 +59,13 @@ const Liked = () => {
     };
 
     useEffect(() => {
-        fetchLikedSongs();
-    }, [uname]); // ✅ Only fetch when `uname` changes
-
+        if (uname) {
+            fetchLikedSongs();
+        }
+    }, [uname])
+    if (!uname) {
+        return <p>Error: Username not found in localStorage.</p>;
+    }
     const removeLike = async (songsid) => {
         try {
             const response = await fetch(`http://localhost:5001/taste`, {

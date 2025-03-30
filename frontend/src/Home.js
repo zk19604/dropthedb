@@ -7,16 +7,18 @@ import Friends from "./Friends";
 
 function Home() {
   const username = localStorage.getItem("username"); // ✅ Get username from localStorage
-  const userid = localStorage.getItem("userId")
+  const userid = localStorage.getItem("userId");
+
   return (
-    <div >
+    <div>
       <User searchName={username} />  
       <Friends />
-      <Playlist />
-      <Liked uname={username} /> 
+      <Playlist/>
       <Player />
-     
-     <a href="/delete">Tired of us? wanna delete?</a>
+      <Liked uname={username} /> 
+      <a href="/delete">Tired of us? Wanna delete?</a>
+      <br />
+      <a href={"/reccomendedsongspage"}>View Recommended Songs</a>
     </div>
   );
 }
