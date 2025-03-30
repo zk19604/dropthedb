@@ -39,7 +39,6 @@ const RecommendedSongs = ({ userId }) => {
 
     return (
         <div>
-            <h2>Recommended Songs</h2>
             <div>
                 <label>
                     <input
@@ -67,6 +66,7 @@ const RecommendedSongs = ({ userId }) => {
                         <li key={song.songid}>
                             <strong>{song.stitle}</strong>
                         </li>
+                        //other feature like player like button and add to playlist added here
                     ))}
                 </ul>
             )}

@@ -26,25 +26,7 @@ const RecommendedSongsByArtists = ({ userId }) => {
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
+}
 
-    return (
-        <div>
-            <h2>Recommended Songs by Top Artists</h2>
-            {songs.length === 0 ? (
-                <p>No recommendations available.</p>
-            ) : (
-                <ul>
-                    {songs.map(song => (
-                        <li key={song.songid}>
-                            <strong>{song.stitle}</strong>
-                            //other features to be added here like being able to play the song, like it, and add to playlist
-    
-                        </li>
-                    ))}
-                </ul>
-            )}
-        </div>
-    );
-};
 
 export default RecommendedSongsByArtists;

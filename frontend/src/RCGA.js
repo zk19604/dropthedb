@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const RecommendedSongsByGenres = ({ userId }) => {
+const RecommendedSongsByArtistsAndGenres = ({ userId }) => {
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -8,7 +8,7 @@ const RecommendedSongsByGenres = ({ userId }) => {
     useEffect(() => {
         const fetchSongs = async () => {
             try {
-                const response = await fetch(`http://localhost:5001/topgenresongs?id=${userId}`);
+                const response = await fetch(`http://localhost:5001/topartistandgenresongs?id=${userId}`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch recommended songs');
                 }
@@ -26,5 +26,7 @@ const RecommendedSongsByGenres = ({ userId }) => {
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
+
 }
-export default RecommendedSongsByGenres;
+
+export default RecommendedSongsByArtistsAndGenres;
