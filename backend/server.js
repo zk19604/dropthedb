@@ -12,7 +12,7 @@ app.use(cors());
 
 const config = {
   user: "sa",
-  password: "dd84b5aS@",
+  password: "Zainab.19",
   server: "localhost",
   database: "project",
   options: {
@@ -1419,7 +1419,7 @@ app.get("/friendssongs", async (req, res) => {
     s.srating AS rating,
     s.simage AS image_url,
     s.trackuri AS track_uri,
-    t.userid AS friend_id  -- ✅ Identify which friend liked the song
+    t.userid AS friend_id 
 FROM FRIENDS f
 JOIN TASTE t ON (f.user1 = t.userid OR f.user2 = t.userid) 
 JOIN SONGS s ON t.songsid = s.id
@@ -1427,8 +1427,8 @@ LEFT JOIN genre g ON s.sgenre = g.id
 LEFT JOIN album al ON s.salbumid = al.id
 LEFT JOIN songsANDartist sa ON s.id = sa.songsid
 LEFT JOIN artist a ON sa.artistid = a.id
-WHERE (f.user1 = @userId OR f.user2 = @userId) -- ✅ Get all friends of the user
-AND t.userid <> @userId  -- ✅ Exclude the user's own liked songs
+WHERE (f.user1 = @userId OR f.user2 = @userId) 
+AND t.userid <> @userId  
 AND a.aname IS NOT NULL
 GROUP BY 
     s.id,
@@ -1486,6 +1486,191 @@ app.delete("/removefriend", async (req, res) => {
   }
 });
 
+//Recommended songs
+
+//by top3 artists
+
+app.get("/topartistsongs", async (req, res) => {
+  const { id } = req.query;
+  if (!id) return res.status(400).json({ error: "User ID is required" });
+
+  try {
+      const pool = await sql.connect(); // ✅ Ensure DB connection
+
+      // Get top 3 artists liked by the user
+      const topArtistsQuery = `
+          SELECT TOP 3 sa.artistid, COUNT(t.songsid) AS like_count
+          FROM TASTE t
+          JOIN SONGSANDARTIST sa ON t.songsid = sa.songsid
+          WHERE t.userid = @UserID
+          GROUP BY sa.artistid
+          ORDER BY like_count DESC;
+      `;
+
+      const topArtistsResult = await pool
+          .request()
+          .input("UserID", sql.Int, id) // ✅ Bind parameter properly
+          .query(topArtistsQuery);
+
+      if (topArtistsResult.recordset.length === 0) {
+          return res.json([]);
+      }
+
+      // Extract artist IDs
+      const artistIds = topArtistsResult.recordset.map(row => row.artistid).join(",");
+
+      // Ensure we have valid artist IDs before querying
+      if (!artistIds) {
+          return res.json([]);
+      }
+
+      // Fetch songs by these top artists, excluding already liked songs
+      const songsQuery = `
+          SELECT DISTINCT s.id AS songid, s.stitle, s.sgenre, s.salbumid, s.srating
+          FROM SONGS s
+          JOIN SONGSANDARTIST sa ON s.id = sa.songsid
+          WHERE sa.artistid IN (${artistIds})
+          AND s.id NOT IN (SELECT songsid FROM TASTE WHERE userid = @UserID);
+      `;
+
+      const songsResult = await pool
+          .request()
+          .input("UserID", sql.Int, id) // ✅ Bind parameter properly
+          .query(songsQuery);
+
+      res.json(songsResult.recordset);
+  } catch (error) {
+      console.error("Error fetching top artist songs:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.get("/topgenresongs", async (req, res) => {
+  const { id } = req.query;
+  if (!id) return res.status(400).json({ error: "User ID is required" });
+
+  try {
+      const pool = await sql.connect(); // ✅ Ensure DB connection
+
+      // Get top 3 genres liked by the user
+      const topGenresQuery = `
+          SELECT TOP 3 s.sgenre, COUNT(t.songsid) AS like_count
+          FROM TASTE t
+          JOIN SONGS s ON t.songsid = s.id
+          WHERE t.userid = @UserID
+          GROUP BY s.sgenre
+          ORDER BY like_count DESC;
+      `;
+
+      const topGenresResult = await pool
+          .request()
+          .input("UserID", sql.Int, id) // ✅ Bind parameter properly
+          .query(topGenresQuery);
+
+      if (topGenresResult.recordset.length === 0) {
+          return res.json([]);
+      }
+
+      // Extract genre names safely
+      const genreNames = topGenresResult.recordset.map(row => `'${row.sgenre}'`).join(",");
+
+      if (!genreNames) {
+          return res.json([]);
+      }
+
+      // Fetch songs by these top genres, excluding already liked songs
+      const songsQuery = `
+          SELECT DISTINCT s.id AS songid, s.stitle, s.sgenre, s.salbumid, s.srating
+          FROM SONGS s
+          WHERE s.sgenre IN (${genreNames})
+          AND s.id NOT IN (SELECT songsid FROM TASTE WHERE userid = @UserID);
+      `;
+
+      const songsResult = await pool
+          .request()
+          .input("UserID", sql.Int, id) // ✅ Bind parameter properly
+          .query(songsQuery);
+
+      res.json(songsResult.recordset);
+  } catch (error) {
+      console.error("Error fetching top genre songs:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.get("/topartistandgenresongs", async (req, res) => {
+  const { id } = req.query;
+  if (!id) return res.status(400).json({ error: "User ID is required" });
+
+  try {
+      const pool = await sql.connect(); // ✅ Ensure DB connection
+
+      // Get the top 3 artists liked by the user
+      const topArtistsQuery = `
+          SELECT TOP 3 sa.artistid, COUNT(t.songsid) AS like_count
+          FROM TASTE t
+          JOIN SONGSANDARTIST sa ON t.songsid = sa.songsid
+          WHERE t.userid = @UserID
+          GROUP BY sa.artistid
+          ORDER BY like_count DESC;
+      `;
+
+      const topArtistsResult = await pool
+          .request()
+          .input("UserID", sql.Int, id) // ✅ Bind parameter properly
+          .query(topArtistsQuery);
+
+      // Get the top 3 genres liked by the user
+      const topGenresQuery = `
+          SELECT TOP 3 s.sgenre, COUNT(t.songsid) AS like_count
+          FROM TASTE t
+          JOIN SONGS s ON t.songsid = s.id
+          WHERE t.userid = @UserID
+          GROUP BY s.sgenre
+          ORDER BY like_count DESC;
+      `;
+
+      const topGenresResult = await pool
+          .request()
+          .input("UserID", sql.Int, id) // ✅ Bind parameter properly
+          .query(topGenresQuery);
+
+      if (topArtistsResult.recordset.length === 0 && topGenresResult.recordset.length === 0) {
+          return res.json([]);
+      }
+
+      // Extract artist IDs and genre names safely
+      const artistIds = topArtistsResult.recordset.map(row => row.artistid).join(",");
+      const genreNames = topGenresResult.recordset.map(row => `'${row.sgenre}'`).join(",");
+
+      if (!artistIds && !genreNames) {
+          return res.json([]);
+      }
+
+      let whereClause = [];
+      if (artistIds) whereClause.push(`sa.artistid IN (${artistIds})`);
+      if (genreNames) whereClause.push(`s.sgenre IN (${genreNames})`);
+
+      // Fetch songs by top artists and genres, excluding already liked songs
+      const songsQuery = `
+          SELECT DISTINCT s.id AS songid, s.stitle, s.sgenre, s.salbumid, s.srating
+          FROM SONGS s
+          LEFT JOIN SONGSANDARTIST sa ON s.id = sa.songsid
+          WHERE (${whereClause.join(" OR ")})
+          AND s.id NOT IN (SELECT songsid FROM TASTE WHERE userid = @UserID);
+      `;
+
+      const songsResult = await pool
+          .request()
+          .input("UserID", sql.Int, id) // ✅ Bind parameter properly
+          .query(songsQuery);
+
+      res.json(songsResult.recordset);
+  } catch (error) {
+      console.error("Error fetching top artist and genre songs:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
 app.listen(port, () => {
   console.log(` Server running on http://localhost:${port}`);
