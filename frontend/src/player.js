@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { handlelike } from "./Liked";
-import { handleplaylist } from "./Playlist";
+import { handleplaylist } from "./Playlist"
+import RecommendedSongs from "./ReccomendedSongs";
+import RecommendedSongsByArtists from "./RCA";
+import RecommendedSongsByArtistsAndGenres from "./RCGA";
+import RecommendedSongsByGenres from "./RCG";
+
 const clientId = "2cbadd009ef8428285512f390151a730";
 const clientSecret = "f8e498771c7f42f29fccfa9a72083555";
 const redirectUri = "http://localhost:3000/home";
@@ -108,54 +113,90 @@ async function fetchProfile(token) {
   console.log("Spotify Profile:", profile);
   return profile;
 }
+
 async function initializeSpotifyPlayer(token, setPlayer, setDeviceId) {
-  //web player sdk
   const script = document.createElement("script");
   script.src = "https://sdk.scdn.co/spotify-player.js";
   script.async = true;
   document.body.appendChild(script);
 
-  //initialise the spotify player
-  window.onSpotifyWebPlaybackSDKReady = () => {
-    const player = new window.Spotify.Player({
-      name: "My Web Player",
-      getOAuthToken: (cb) => cb(token),
-      volume: 0.5,
-    });
+  script.onload = () => {
+    console.log("Spotify Web Playback SDK Loaded");
+    window.onSpotifyWebPlaybackSDKReady = () => {
+      const player = new window.Spotify.Player({
+        name: "My Web Player",
+        getOAuthToken: (cb) => cb(token),
+        volume: 0.5,
+      });
 
-    //for play
-    player.addListener("ready", ({ device_id }) => {
-      console.log("Ready with Device ID", device_id);
-      setDeviceId(device_id);
-    });
+      player.addListener("ready", ({ device_id }) => {
+        console.log("✅ Spotify Player Ready, Device ID:", device_id);
+        setDeviceId(device_id);
+      });
 
-    player.addListener("not_ready", ({ device_id }) => {
-      console.log("Device ID has gone offline", device_id);
-    });
+      player.addListener("not_ready", ({ device_id }) => {
+        console.warn("⚠️ Spotify Player Not Ready, Device ID:", device_id);
+      });
 
-    //connect the player to spotify
-    player.connect();
-    setPlayer(player);
+      player.addListener("initialization_error", ({ message }) => {
+        console.error("❌ Initialization Error:", message);
+      });
+
+      player.addListener("authentication_error", ({ message }) => {
+        console.error("❌ Authentication Error:", message);
+      });
+
+      player.addListener("account_error", ({ message }) => {
+        console.error("❌ Account Error:", message);
+      });
+
+      player.connect().then((success) => {
+        if (success) {
+          console.log("🎵 Connected to Spotify Player!");
+          setPlayer(player);
+        } else {
+          console.error("❌ Failed to connect Spotify Player.");
+        }
+      });
+    };
   };
 }
+
 
 
 //token for spotfiy access
 //device id where the music will play
 //track uri, spotify uri of the track to play
-async function playMusic(token, deviceId, trackUri) {
-  await fetch(
-    `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
-    {
+export const playMusic = async (token, deviceId, uri) => {
+  if (!deviceId) {
+    console.error("Error: Device ID is undefined");
+    return;
+  }
+
+  if (!token) {
+    console.error("Error: Spotify token is missing or expired");
+    return;
+  }
+
+  try {
+    const response = await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
       method: "PUT",
       headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
       },
-      body: JSON.stringify({ uris: [trackUri] }),
+      body: JSON.stringify({ uris: [uri] })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Spotify API Error:", errorData);
     }
-  );
-}
+  } catch (error) {
+    console.error("Error playing song:", error);
+  }
+};
+
 
 async function pauseMusic(token) {
   await fetch("https://api.spotify.com/v1/me/player/pause", {
@@ -206,32 +247,32 @@ async function searchSongs(token, query) {
 
 export const addToSongs = async (songName, artistNames, imageUrl, trackUri, album, genre, rating) => {
   try {
-      const response = await fetch("http://localhost:5001/addsong", {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-              stitle: songName,
-              trackUri: trackUri,
-              authornames: artistNames, // Array of artists
-              genrename: genre,
-              albumname: album,
-              albumname: album,
-              rating: rating,
-              simage: imageUrl,
-              userId: localStorage.getItem("userId"),
-          }),
-      });
+    const response = await fetch("http://localhost:5001/addsong", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        stitle: songName,
+        trackUri: trackUri,
+        authornames: artistNames, // Array of artists
+        genrename: genre,
+        albumname: album,
+        albumname: album,
+        rating: rating,
+        simage: imageUrl,
+        userId: localStorage.getItem("userId"),
+      }),
+    });
 
-      if (!response.ok) {
-          throw new Error("Failed to add the song");
-      }
+    if (!response.ok) {
+      throw new Error("Failed to add the song");
+    }
 
-      console.log("Song added successfully");
+    console.log("Song added successfully");
 
   } catch (error) {
-      console.error("Error adding the song:", error);
+    console.error("Error adding the song:", error);
   }
 };
 
@@ -241,8 +282,30 @@ function Player() {
   const [deviceId, setDeviceId] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("access_token"));
   const [query, setQuery] = useState("");
+  const [userId, setUserId] = useState(null);
+
   const [searchResults, setSearchResults] = useState([]);
 
+  // useEffect(() => {
+
+  //   async function fetchToken() {
+  //     const params = new URLSearchParams(window.location.search);
+  //     const code = params.get("code");
+
+  //     const accessToken = await getAccessToken(code);
+  //     if (accessToken) {
+  //       setToken(accessToken);
+  //       const userProfile = await fetchProfile(token);
+  //       setProfile(userProfile);
+  //       setUserId(userProfile.id);
+  //       initializeSpotifyPlayer(token, setPlayer, setDeviceId);
+
+  //     } else {
+  //       console.error("Failed to get access token");
+  //     }
+  //   }
+  //   fetchToken();
+  // }, [token]);
   useEffect(() => {
     async function fetchToken() {
       const params = new URLSearchParams(window.location.search);
@@ -251,15 +314,20 @@ function Player() {
       const accessToken = await getAccessToken(code);
       if (accessToken) {
         setToken(accessToken);
+        // const userProfile = await fetchProfile(accessToken); // ✅ Use new token
         const userProfile = await fetchProfile(token);
         setProfile(userProfile);
-        initializeSpotifyPlayer(token, setPlayer, setDeviceId);
+        setUserId(userProfile.id);
+        initializeSpotifyPlayer(token, setPlayer, setDeviceId); // ✅ Use new token
       } else {
         console.error("Failed to get access token");
       }
     }
-    fetchToken();
-  }, [token]);
+
+    if (!token) fetchToken();
+  }, []);
+
+
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -273,11 +341,17 @@ function Player() {
       {profile ? (
         <div>
           {deviceId ? (
-            <div>
-              <button onClick={() => pauseMusic(token)}>⏸ Pause</button>
-            </div>
+            <button onClick={() => pauseMusic(token)}>⏸ Pause</button>
           ) : (
-            <p>Loading player...</p>
+            <p>🎵 Loading Spotify Player...</p>
+          )}
+          {userId && (
+            <>
+              <RecommendedSongsByArtists userId={userId} token={token} deviceId={deviceId} />
+              <RecommendedSongsByArtistsAndGenres userId={userId} token={token} deviceId={deviceId} />
+              <RecommendedSongsByGenres userId={userId} token={token} deviceId={deviceId} />
+              <RecommendedSongs token={token} deviceId={deviceId} />
+            </>
           )}
 
           <form onSubmit={handleSearch}>
