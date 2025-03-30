@@ -51,6 +51,8 @@ create table SONGS(
     stitle varchar(255) not null,
     sgenre int ,
     salbumid int, 
+    srating float check(srating BETWEEN 1 AND 100), 
+    simage varchar(MAX),
     srating float check(srating BETWEEN 1 AND 5), 
     simage varchar(255),
     trackuri varchar(255),
