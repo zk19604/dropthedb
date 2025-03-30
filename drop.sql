@@ -58,8 +58,8 @@ create table SONGS(
     stitle varchar(255) not null,
     sgenre int ,
     salbumid int, 
-    srating float check(srating BETWEEN 1 AND 5), 
-    simage VARBINARY(MAX),
+    srating float check(srating BETWEEN 1 AND 100), 
+    simage varchar(MAX),
     trackuri varchar(255),
     constraint sfk2 FOREIGN key (sgenre)
     REFERENCES genre(id),
