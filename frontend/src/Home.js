@@ -17,13 +17,13 @@ function Home() {
       <User searchName={username} />  
       <Search />
       <Airec />
+      <a href={"/reccomendedsongspage"}>View Recommended Songs</a>
       <Friends />
       <Playlist/>
       <Player />
       <Liked uname={username} /> 
       <a href="/delete">Tired of us? Wanna delete?</a>
       <br />
-      <a href={"/reccomendedsongspage"}>View Recommended Songs</a>
     </div>
   );
 }

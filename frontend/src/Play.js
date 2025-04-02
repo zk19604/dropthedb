@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { playMusic, pauseMusic } from "./player"; // Import functions
 
 function Play() {
   const [track, setTrack] = useState(null);

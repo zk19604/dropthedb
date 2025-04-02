@@ -106,6 +106,7 @@ async function fetchProfile(token) {
   console.log("Spotify Profile:", profile);
   return profile;
 }
+
 async function initializeSpotifyPlayer(token, setPlayer, setDeviceId) {
   //web player sdk
   const script = document.createElement("script");
@@ -137,6 +138,8 @@ async function initializeSpotifyPlayer(token, setPlayer, setDeviceId) {
     setPlayer(player);
   };
 }
+
+
 
 
 //token for spotfiy access
@@ -220,32 +223,32 @@ export async function pauseMusic() {
 
 export const addToSongs = async (songName, artistNames, imageUrl, trackUri, album, genre, rating) => {
   try {
-      const response = await fetch("http://localhost:5001/addsong", {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-              stitle: songName,
-              trackUri: trackUri,
-              authornames: artistNames, // Array of artists
-              genrename: genre,
-              albumname: album,
-              albumname: album,
-              rating: rating,
-              simage: imageUrl,
-              userId: localStorage.getItem("userId"),
-          }),
-      });
+    const response = await fetch("http://localhost:5001/addsong", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        stitle: songName,
+        trackUri: trackUri,
+        authornames: artistNames, // Array of artists
+        genrename: genre,
+        albumname: album,
+        albumname: album,
+        rating: rating,
+        simage: imageUrl,
+        userId: localStorage.getItem("userId"),
+      }),
+    });
 
-      if (!response.ok) {
-          throw new Error("Failed to add the song");
-      }
+    if (!response.ok) {
+      throw new Error("Failed to add the song");
+    }
 
-      console.log("Song added successfully");
+    console.log("Song added successfully");
 
   } catch (error) {
-      console.error("Error adding the song:", error);
+    console.error("Error adding the song:", error);
   }
 };
 
