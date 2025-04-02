@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { handlelike } from "./Liked";
-import { handleplaylist } from "./Playlist";
 const clientId = "2cbadd009ef8428285512f390151a730";
 const clientSecret = "f8e498771c7f42f29fccfa9a72083555";
 const redirectUri = "http://localhost:3000/home";
@@ -127,6 +125,7 @@ async function initializeSpotifyPlayer(token, setPlayer, setDeviceId) {
     player.addListener("ready", ({ device_id }) => {
       console.log("Ready with Device ID", device_id);
       setDeviceId(device_id);
+      localStorage.setItem("device_id", device_id);
     });
 
     player.addListener("not_ready", ({ device_id }) => {
@@ -143,66 +142,81 @@ async function initializeSpotifyPlayer(token, setPlayer, setDeviceId) {
 //token for spotfiy access
 //device id where the music will play
 //track uri, spotify uri of the track to play
-async function playMusic(token, deviceId, trackUri) {
-  await fetch(
-    `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
-    {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ uris: [trackUri] }),
-    }
-  );
-}
+export async function playMusic(trackUri) {
+  const deviceId = localStorage.getItem("device_id");
+  const token = localStorage.getItem("access_token");
+  console.log("Device ID:", deviceId);
+  console.log("Track URI:", trackUri);
+  console.log("Token:", token);
 
-async function pauseMusic(token) {
-  await fetch("https://api.spotify.com/v1/me/player/pause", {
-    method: "PUT",
-    headers: { Authorization: `Bearer ${token}` },
-  });
-}
-
-async function searchSongs(token, query) {
-  if (!query) return [];
-
-  const result = await fetch(
-    `https://api.spotify.com/v1/search?q=${encodeURIComponent(
-      query
-    )}&type=track&limit=10`,
-    {
-      method: "GET",
-      headers: { Authorization: `Bearer ${token}` },
-    }
-  );
-
-  const data = await result.json();
-
-  if (!data.tracks || !data.tracks.items) {
-    console.log("No tracks found.");
-    return [];
+  if (!deviceId) {
+    console.error("No device ID found in localStorage.");
+    return;
   }
 
-  // Extract and log song details
-  data.tracks.items.forEach((track) => {
-    console.log("Song Name:", track.name);
-    console.log(
-      "Artists:",
-      track.artists.map((artist) => artist.name).join(", ")
-    );
-    console.log("Album Name:", track.album.name);
-    console.log("Album Cover:", track.album.images[0]?.url);
-    console.log("Duration (ms):", track.duration_ms);
-    console.log("Explicit:", track.explicit ? "Yes" : "No");
-    console.log("Popularity:", track.popularity);
-    console.log("Preview URL:", track.preview_url || "No preview available");
-    console.log("Spotify URI:", track.uri);
-    console.log("----------------------------");
-  });
+  if (!trackUri) {
+    console.error("No track URI provided.");
+    return;
+  }
 
-  return data.tracks.items;
+  try {
+    // Start playing the music
+    const response = await fetch(
+      `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ uris: [trackUri] }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to play music: ${response.statusText}`);
+    }
+
+    // Fetch the current playing track details after successful playback
+    const currentTrackResponse = await fetch(
+      "https://api.spotify.com/v1/me/player/currently-playing",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!currentTrackResponse.ok) {
+      throw new Error("Failed to fetch current track");
+    }
+
+    const currentTrack = await currentTrackResponse.json();
+    localStorage.setItem("currentTrack", JSON.stringify(currentTrack));
+    console.log("Current Track:", currentTrack);
+    
+  } catch (error) {
+    console.error("Error playing music:", error);
+  }
 }
+
+export async function pauseMusic() {
+
+  try {
+    const token = localStorage.getItem("access_token");
+    const response = await fetch("https://api.spotify.com/v1/me/player/pause", {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) {
+      throw new Error("Failed to pause music");
+    }
+  } catch (error) {
+    console.error("Error pausing music:", error);
+  }
+}
+
 
 export const addToSongs = async (songName, artistNames, imageUrl, trackUri, album, genre, rating) => {
   try {
@@ -240,8 +254,8 @@ function Player() {
   const [player, setPlayer] = useState(null);
   const [deviceId, setDeviceId] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("access_token"));
-  const [query, setQuery] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
+  const [track, setTrack] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     async function fetchToken() {
@@ -251,123 +265,41 @@ function Player() {
       const accessToken = await getAccessToken(code);
       if (accessToken) {
         setToken(accessToken);
-        const userProfile = await fetchProfile(token);
+        localStorage.setItem("access_token", accessToken); // Store new token
+        const userProfile = await fetchProfile(accessToken);
         setProfile(userProfile);
-        initializeSpotifyPlayer(token, setPlayer, setDeviceId);
+        initializeSpotifyPlayer(accessToken, setPlayer, setDeviceId);
       } else {
         console.error("Failed to get access token");
       }
+      
     }
+    
+    
     fetchToken();
-  }, [token]);
+  }, []);
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!token) return;
-    const results = await searchSongs(token, query);
-    setSearchResults(results);
+  // Toggle play/pause
+  const togglePlayPause = async () => {
+    if (!token || !track) return;
+    if (isPlaying) {
+      await pauseMusic();
+    } else {
+      await playMusic( track.uri);
+    }
+    setIsPlaying(!isPlaying);
   };
+
   return (
-    <div>
+    <div
+    >
       <h1>Spotify Player</h1>
+
       {profile ? (
         <div>
-          {deviceId ? (
-            <div>
-              <button onClick={() => pauseMusic(token)}>⏸ Pause</button>
-            </div>
-          ) : (
-            <p>Loading player...</p>
-          )}
-
-          <form onSubmit={handleSearch}>
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search for songs..."
-            />
-            <button type="submit">Search</button>
-          </form>
-
-          {searchResults.length > 0 && (
-            <div>
-              <h3>Search Results:</h3>
-              {searchResults.map((track) => (
-                <div
-                  key={track.id}
-                  style={{
-                    margin: "10px 0",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <img
-                    src={track.album.images[0]?.url}
-                    alt="Album"
-                    width={50}
-                  />
-                  <div style={{ marginLeft: "10px" }}>
-                    <strong>{track.name}</strong> -{" "}
-                    {track.artists.map((artist) => artist.name).join(", ")}
-                  </div>
-                  <button
-                    onClick={() => {
-                      playMusic(token, deviceId, track.uri); // ✅ First function
-                      addToSongs(
-                        track.name,
-                        track.artists.map((artist) => artist.name), // ✅ Pass an array of artist names
-                        track.album.images[0]?.url, // ✅ Pass album image URL
-                        track.uri,
-                        track.album.name, // ✅ Pass album name correctly
-                        track.artists[0]?.genres
-                          ? track.artists[0].genres[0]
-                          : "Unknown", // ✅ Handle missing genre
-                        track.popularity
-                      );
-                    }}
-                    style={{ marginLeft: "10px" }}
-                  >
-                    ▶️ Play
-                  </button>
-
-                  <button
-                    onClick={() =>
-                      handlelike(
-                        track.name,
-                        track.artists.map((artist) => artist.name), // ✅ Pass an array of artist names
-                        track.album.images[0]?.url, // ✅ Pass album image URL
-                        track.uri,
-                        track.album.name, // ✅ Pass album name correctly
-                        track.artists[0]?.genres
-                          ? track.artists[0].genres[0]
-                          : "Unknown", // ✅ Handle missing genre
-                        track.popularity // ✅ Using Spotify's popularity rating as a rating
-                      )
-                    }
-                    style={{ marginLeft: "10px" }}
-                  >
-                    Like
-                  </button>
-
-                  <button
-                    onClick={() =>
-                      handleplaylist(
-                        track.name,
-                        track.artists.map((artist) => artist.name).join(", "),
-                        track.album.images[0]?.url,
-                        track.uri
-                      )
-                    }
-                    style={{ marginLeft: "10px" }}
-                  >
-                    Add to playlist
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+          
+          logged in
+          </div>
       ) : (
         <button onClick={loginWithSpotify}>Login with Spotify</button>
       )}

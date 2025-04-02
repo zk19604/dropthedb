@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import playMusic from './player'
 
+const token = localStorage.getItem("access_token");
+const deviceId=localStorage.getItem("device_id");
 const RecommendedSongs = ({ userId }) => {
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -24,6 +27,7 @@ const RecommendedSongs = ({ userId }) => {
                 }
                 const data = await response.json();
                 setSongs(data);
+                console.log(data);
             } catch (error) {
                 setError(error.message);
             } finally {
@@ -65,6 +69,25 @@ const RecommendedSongs = ({ userId }) => {
                     {songs.map(song => (
                         <li key={song.songid}>
                             <strong>{song.stitle}</strong>
+                             {/* <button
+                                                onClick={() => {
+                                                  playMusic(token, deviceId, track.uri); // ✅ First function
+                                                  addToSongs(
+                                                    track.name,
+                                                    track.artists.map((artist) => artist.name), // ✅ Pass an array of artist names
+                                                    track.album.images[0]?.url, // ✅ Pass album image URL
+                                                    track.uri,
+                                                    track.album.name, // ✅ Pass album name correctly
+                                                    track.artists[0]?.genres
+                                                      ? track.artists[0].genres[0]
+                                                      : "Unknown", // ✅ Handle missing genre
+                                                    track.popularity
+                                                  );
+                                                }}
+                                                style={{ marginLeft: "10px" }}
+                                              >
+                                                ▶️ Play
+                                              </button> */}
                         </li>
                         //other feature like player like button and add to playlist added here
                     ))}

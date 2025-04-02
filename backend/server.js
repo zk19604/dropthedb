@@ -1170,7 +1170,8 @@ app.get("/likedsongs", async (req, res) => {
                 s.stitle,  
                 g.gname AS genre,
  STRING_AGG(a.aname, ', ') AS artist_name , 
-alb.aname AS album_name
+alb.aname AS album_name, 
+s.trackuri as trackuri
             FROM taste
             JOIN users u ON u.id = taste.userid
             JOIN songs s ON s.id = taste.songsid
@@ -1179,7 +1180,7 @@ alb.aname AS album_name
             LEFT JOIN songsANDartist sa ON s.id = sa.songsid
             LEFT JOIN artist a ON sa.artistid = a.id
             WHERE u.uname = @name
-            GROUP BY s.id, s.stitle, g.gname, alb.aname;
+            GROUP BY s.id, s.stitle, g.gname, alb.aname,s.trackuri;
         `;
 
     const pool = await sql.connect(config);
@@ -1499,11 +1500,12 @@ app.get("/topartistsongs", async (req, res) => {
 
       // Get top 3 artists liked by the user
       const topArtistsQuery = `
-          SELECT TOP 3 sa.artistid, COUNT(t.songsid) AS like_count
+          SELECT TOP 3 sa.artistid, COUNT(t.songsid) AS like_count, s.trackuri as trackuri
           FROM TASTE t
+          join songs s on s.id = t.songsid
           JOIN SONGSANDARTIST sa ON t.songsid = sa.songsid
           WHERE t.userid = @UserID
-          GROUP BY sa.artistid
+          GROUP BY sa.artistid, s.trackuri
           ORDER BY like_count DESC;
       `;
 
@@ -1785,6 +1787,104 @@ app.post("/addsong", async (req, res) => {
     res
       .status(500)
       .json({ message: "Error liking song", error: error.message });
+  }
+});
+
+const clientId ="2cbadd009ef8428285512f390151a730";
+const clientSecret = "f8e498771c7f42f29fccfa9a72083555";
+const SPOTIFY_API_URL = "https://api.spotify.com/v1/me";
+const SPOTIFY_SEARCH_URL = "https://api.spotify.com/v1/search";
+// Function to get Spotify access token
+
+
+async function getSpotifyAccessToken() {
+  const response = await fetch("https://accounts.spotify.com/api/token", {
+      method: "POST",
+      headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+          grant_type: "client_credentials",
+          client_id: clientId,
+          client_secret: clientSecret,
+      }),
+  });
+  const data = await response.json();
+  return data.access_token;
+}
+
+
+app.get("/api/spotify-token-search", async (req, res) => {
+  try {
+    const accessToken = await getSpotifyAccessToken();
+    if (accessToken) {
+      res.json({ access_token: accessToken });
+    } else {
+      res.status(400).json({ error: "Failed to get access token" });
+    }
+  } catch (error) {
+    console.error("Error fetching access token:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Route to fetch song recommendations based on a name
+app.get("/searchairec", async (req, res) => {
+  const { name } = req.query;
+  if (!name) {
+      return res.status(400).json({ error: "Please provide a name query parameter." });
+  }
+
+  try {
+      const accessToken = await getSpotifyAccessToken();
+      const searchUrl = `${SPOTIFY_SEARCH_URL}?q=${encodeURIComponent(name)}&type=track&limit=1`;
+      
+      const response = await fetch(searchUrl, {
+          headers: {
+              "Authorization": `Bearer ${accessToken}`,
+          },
+      });
+      
+      const data = await response.json();
+      if (!data.tracks || !data.tracks.items.length) {
+          return res.status(404).json({ error: "No songs found." });
+      }
+
+      const songs = data.tracks.items.map((track) => ({
+        name: track.name,
+        artist: track.artists.map((artist) => artist.name).join(", "),
+        album: track.album.name,
+        uri: track.uri,
+        image: track.album.images[0]?.url
+      }));
+
+      res.json({ songs });
+  } catch (error) {
+      console.error("Error fetching songs:", error);
+      res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/api/search-songs", async (req, res) => {
+  const { query, token } = req.query;
+
+  try {
+    const response = await fetch(`${SPOTIFY_API_URL}?q=${encodeURIComponent(query)}&type=track&limit=10`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (!data.tracks || !data.tracks.items) {
+      return res.status(404).json({ message: "No tracks found." });
+    }
+
+    res.json(data.tracks);
+  } catch (error) {
+    console.error("Error fetching Spotify search:", error);
+    res.status(500).json({ message: "Error fetching songs." });
   }
 });
 

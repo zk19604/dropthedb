@@ -198,4 +198,19 @@ GROUP BY
     s.trackuri;
 
     
-    
+     SELECT 
+                s.id AS songsid, 
+                s.stitle,  
+                g.gname AS genre,
+ STRING_AGG(a.aname, ', ') AS artist_name , 
+alb.aname AS album_name, 
+s.trackuri as trackuri
+            FROM taste
+            JOIN users u ON u.id = taste.userid
+            JOIN songs s ON s.id = taste.songsid
+            JOIN genre g ON s.sgenre = g.id
+            join album alb on alb.id=s.salbumid
+            LEFT JOIN songsANDartist sa ON s.id = sa.songsid
+            LEFT JOIN artist a ON sa.artistid = a.id
+            WHERE u.uname = 'zainab'
+            GROUP BY s.id, s.stitle, g.gname, alb.aname, s.trackuri
