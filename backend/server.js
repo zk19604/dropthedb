@@ -1847,7 +1847,6 @@ app.post("/addsong", async (req, res) => {
 
 const clientId ="2cbadd009ef8428285512f390151a730";
 const clientSecret = "f8e498771c7f42f29fccfa9a72083555";
-const SPOTIFY_API_URL = "https://api.spotify.com/v1/me";
 const SPOTIFY_SEARCH_URL = "https://api.spotify.com/v1/search";
 // Function to get Spotify access token
 
@@ -1920,28 +1919,7 @@ app.get("/searchairec", async (req, res) => {
   }
 });
 
-app.get("/api/search-songs", async (req, res) => {
-  const { query, token } = req.query;
 
-  try {
-    const response = await fetch(`${SPOTIFY_API_URL}?q=${encodeURIComponent(query)}&type=track&limit=10`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const data = await response.json();
-
-    if (!data.tracks || !data.tracks.items) {
-      return res.status(404).json({ message: "No tracks found." });
-    }
-
-    res.json(data.tracks);
-  } catch (error) {
-    console.error("Error fetching Spotify search:", error);
-    res.status(500).json({ message: "Error fetching songs." });
-  }
-});
 
 app.listen(port, () => {
   console.log(` Server running on http://localhost:${port}`);
