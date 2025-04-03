@@ -1420,7 +1420,7 @@ app.get("/friendssongs", async (req, res) => {
     s.srating AS rating,
     s.simage AS image_url,
     s.trackuri AS track_uri,
-    t.userid AS friend_id 
+    t.userid AS friend_id
 FROM FRIENDS f
 JOIN TASTE t ON (f.user1 = t.userid OR f.user2 = t.userid) 
 JOIN SONGS s ON t.songsid = s.id
@@ -1590,7 +1590,6 @@ app.get("/topartistsongs", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 app.get("/topgenresongs", async (req, res) => {
   const { id } = req.query;
   const userId = id;// Convert id to a number
@@ -1730,7 +1729,6 @@ app.get("/topartistandgenresongs", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
 
 app.post("/addsong", async (req, res) => {
   let transaction;

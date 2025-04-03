@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from "react";
-
+import { playMusic } from "./player"; // Import playMusic function
 const userId = localStorage.getItem("userId"); // Get userId from localStorage
 
 // ✅ Function to Get Friends' Songs
 export const getFriendsSongs = async () => {
   try {
-    const songResponse = await fetch(`http://localhost:5001/friendssongs?userId=${userId}`);
-    if (!songResponse.ok) throw new Error(`Failed to fetch songs for user ${userId}`);
+    const songResponse = await fetch(
+      `http://localhost:5001/friendssongs?userId=${userId}`
+    );
+    if (!songResponse.ok)
+      throw new Error(`Failed to fetch songs for user ${userId}`);
 
     const songs = await songResponse.json();
     console.log("Fetched songs:", songs);
-    
+
     return songs;
   } catch (error) {
     console.error("Error fetching friends' songs:", error);
@@ -19,12 +22,13 @@ export const getFriendsSongs = async () => {
 };
 
 const Friends = () => {
-  const [friends, setFriends] = useState([]); 
-  const [users, setUsers] = useState([]); 
-  const [friendSongs, setFriendSongs] = useState([]); 
+  const [friends, setFriends] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [friendSongs, setFriendSongs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const token = localStorage.getItem("access_token");
+  const deviceId = localStorage.getItem("device_id");
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -34,7 +38,8 @@ const Friends = () => {
           getFriendsSongs(),
         ]);
 
-        if (!friendsRes.ok || !usersRes.ok) throw new Error("Failed to fetch data");
+        if (!friendsRes.ok || !usersRes.ok)
+          throw new Error("Failed to fetch data");
 
         const friendsData = await friendsRes.json();
         const usersData = await usersRes.json();
@@ -42,15 +47,16 @@ const Friends = () => {
         setFriends(friendsData);
         setUsers(usersData);
         setFriendSongs(songsRes);
+       
       } catch (err) {
         setError("Error fetching data");
       } finally {
-        setLoading(false); }
+        setLoading(false);
+      }
     };
 
     fetchData();
   }, []);
-
 
   const addFriend = async (friendId, friendName) => {
     try {
@@ -63,8 +69,8 @@ const Friends = () => {
       });
 
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Error adding friend");
-
+      if (!response.ok)
+        throw new Error(result.message || "Error adding friend");
 
       setFriends([...friends, { friendId, friendName }]);
     } catch (error) {
@@ -73,7 +79,9 @@ const Friends = () => {
   };
 
   const nonFriendUsers = users.filter(
-    (user) => !friends.some((friend) => friend.friendId === user.id) && user.id !== userId
+    (user) =>
+      !friends.some((friend) => friend.friendId === user.id) &&
+      user.id !== userId
   );
 
   const removeFriend = async (friendId) => {
@@ -87,7 +95,8 @@ const Friends = () => {
       });
 
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Error removing friend");
+      if (!response.ok)
+        throw new Error(result.message || "Error removing friend");
 
       // ✅ Update the friends list immediately
       setFriends(friends.filter((friend) => friend.friendId !== friendId));
@@ -95,7 +104,6 @@ const Friends = () => {
       alert("Error removing friend: " + error.message);
     }
   };
-
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
@@ -108,10 +116,12 @@ const Friends = () => {
       ) : (
         <ul>
           {friends.map((friend) => (
-            <li key={friend.friendId}>{friend.friendName}
-            <button onClick={() => removeFriend(friend.friendId)}>Remove Friend</button>
+            <li key={friend.friendId}>
+              {friend.friendName}
+              <button onClick={() => removeFriend(friend.friendId)}>
+                Remove Friend
+              </button>
             </li>
-
           ))}
         </ul>
       )}
@@ -123,14 +133,29 @@ const Friends = () => {
         <ul>
           {friendSongs.map((song) => (
             <li key={song.songsid}>
-            <strong>{song.songtitle}</strong>  
-            <br />
-            <span>by {song.artist_name && song.artist_name.length > 0 ? song.artist_name : "Unknown Artist"}</span>  
-            <br />
-            <span>Album: {song.album_name? song.album_name : "Unknown Genre"}</span>
-            <br/>
+              <strong>{song.songtitle}</strong>
+              <br />
+              <span>
+                by{" "}
+                {song.artist_name && song.artist_name.length > 0
+                  ? song.artist_name
+                  : "Unknown Artist"}
+              </span>
+              <br />
+              <span>
+                Album: {song.album_name ? song.album_name : "Unknown Genre"}
+              </span>
+              <br />
               <span>friend : {song.friend_id}</span>
-             </li>
+              <button
+                onClick={() => {
+                  playMusic(token, deviceId, song.track_uri);
+                }}
+                style={{ marginLeft: "10px" }}
+              >
+                ▶️ Play
+              </button>
+            </li>
           ))}
         </ul>
       )}
@@ -143,7 +168,9 @@ const Friends = () => {
           {nonFriendUsers.map((user) => (
             <li key={user.id}>
               {user.uname}{" "}
-              <button onClick={() => addFriend(user.id, user.uname)}>Add Friend</button>
+              <button onClick={() => addFriend(user.id, user.uname)}>
+                Add Friend
+              </button>
             </li>
           ))}
         </ul>

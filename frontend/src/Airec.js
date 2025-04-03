@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { playMusic } from "./player";
+import { initializeSpotifyPlayer } from "./player";
 const API_KEY = "AIzaSyCLZN_0EzjgjXd6qrzW7wua4NyfxMcth1k";
 
 async function fetchSongsByName(name) {
@@ -31,9 +32,12 @@ function Airec() {
   const [songs, setSongs] = useState([]);
   const moods = ["Happy", "Sad", "Relaxed", "Energetic", "Focused", "Chill"];
   const languages = ["English", "Spanish", "French", "Hindi", "Urdu"];
-
+  const [deviceId, setDeviceId] = useState(null);
+  const [player, setPlayer] = useState(null);
+  const token = localStorage.getItem("access_token");
   const handleGenerate = async () => {
     try {
+      initializeSpotifyPlayer(token, setPlayer, setDeviceId);
       const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
         {
@@ -124,7 +128,7 @@ function Airec() {
                 <p>{song.uri}</p>
                 <button
                   onClick={() => {
-                    playMusic(song.uri); // ✅ First function
+                    playMusic(token, deviceId, song.uri); // ✅ First function
                   }}
                   style={{ marginLeft: "10px" }}
                 >

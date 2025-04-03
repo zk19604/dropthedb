@@ -6,7 +6,7 @@ import AdminHome from "./AdminHome";//Import Admin Component
 import RecommendedSongsPage from "./ReccomendedSongsPage";
 import Signup from "./Signup"
 import Delete from "./Delete"
-
+import Airecpage from "./Airecpage";
 const App = () => {
     return (
         <Router>
@@ -17,7 +17,7 @@ const App = () => {
                 <Route path="/delete" element={<Delete />} />
                 <Route path="/adminhome" element={<AdminHome />} />
                 <Route path="/reccomendedsongspage" element={<RecommendedSongsPage/>}/>
-                
+                <Route path="/Ai" element ={<Airecpage/>}/>
             </Routes>
         </Router>
     );

@@ -1,15 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { playMusic } from './player';
-
-const RecommendedSongs = ({ userId, token, deviceId }) => {
+import { initializeSpotifyPlayer } from './player';
+const RecommendedSongs = ({ userId, token }) => {
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [filterArtists, setFilterArtists] = useState(true);
     const [filterGenres, setFilterGenres] = useState(false);
-
+    const [deviceId, setDeviceId] = useState(null);
+    const [player, setPlayer] = useState(null);
+    //deviceId = deviceId || localStorage.getItem("device_id");
+    //token = token || localStorage.getItem("access_token");
+    // console.log("User ID:", userId);
+    // console.log("Token:", token);   
+    // console.log("Device ID:", deviceId);
     useEffect(() => {
         const fetchSongs = async () => {
+            initializeSpotifyPlayer(token, setPlayer, setDeviceId);
             if (!userId || isNaN(userId)) {
                 setError("Invalid User ID");
                 setLoading(false);
@@ -37,11 +44,11 @@ const RecommendedSongs = ({ userId, token, deviceId }) => {
             }
         };
 
-    fetchSongs();
-  }, [userId, filterArtists, filterGenres]);
+        fetchSongs();
+    }, [userId, filterArtists, filterGenres]);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
+    if (loading) return <p>Loading...</p>;
+    if (error) return <p>Error: {error}</p>;
 
     return (
         <div>

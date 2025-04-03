@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { playMusic } from './player';
 
@@ -5,7 +6,9 @@ const RecommendedSongsByArtists = ({ userId, token, deviceId }) => { // Accept t
     const [songs, setSongs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
+    console.log("User ID:", userId);
+    console.log("Token:", token);   
+    console.log("Device ID:", deviceId);
     useEffect(() => {
         const fetchSongs = async () => {
             try {

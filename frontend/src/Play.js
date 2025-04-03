@@ -3,16 +3,14 @@ import React, { useState, useEffect } from "react";
 function Play() {
   const [track, setTrack] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [lastTrackId, setLastTrackId] = useState(null); // Store last track ID to detect changes
-
-  // Function to fetch song from localStorage
+  const [lastTrackId, setLastTrackId] = useState(null); 
   const updateTrack = () => {
     const songDetailsString = localStorage.getItem("currentTrack");
     if (songDetailsString) {
       const songDetails = JSON.parse(songDetailsString);
       if (!songDetails.item) return;
 
-      // Only update state if a new song is played
+    
       if (songDetails.item.id !== lastTrackId) {
         setTrack(songDetails.item);
         setLastTrackId(songDetails.item.id);
@@ -21,14 +19,14 @@ function Play() {
     }
   };
 
-  // Load song on first render
+ 
   useEffect(() => {
-    updateTrack(); // Load initially
-    const interval = setInterval(updateTrack, 1000); // Poll every second
-    return () => clearInterval(interval); // Cleanup on unmount
+    updateTrack(); 
+    const interval = setInterval(updateTrack, 1000);
+    return () => clearInterval(interval); 
   }, []);
 
-  if (!track) return null; // Hide player if no track is found
+  if (!track) return null; 
 
 
   return (

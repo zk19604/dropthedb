@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { playMusic, addToSongs } from "./player";
-import Play from "./Play"; // Import Play component
+import { playMusic, } from "./player";
+
 export const handlelike = async (
   songName,
   artistNames,
@@ -45,7 +45,8 @@ const Liked = () => {
   const [error, setError] = useState(null);
   const uname = localStorage.getItem("username"); // ✅ Get username inside component
   const userid = localStorage.getItem("userId");
-
+const token = localStorage.getItem("access_token");
+const deviceId = localStorage.getItem("device_id");
   // ✅ Define fetchLikedSongs inside Liked so we can update state
   const fetchLikedSongs = async () => {
     try {
@@ -119,7 +120,7 @@ const Liked = () => {
               </span>
               <button
                 onClick={() => {
-                  playMusic(song.trackuri); 
+                  playMusic(token, deviceId, song.trackuri); 
                  
                  
                 }}
