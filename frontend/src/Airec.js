@@ -35,6 +35,7 @@ function Airec() {
   const [deviceId, setDeviceId] = useState(null);
   const [player, setPlayer] = useState(null);
   const token = localStorage.getItem("access_token");
+  
   const handleGenerate = async () => {
     try {
       initializeSpotifyPlayer(token, setPlayer, setDeviceId);

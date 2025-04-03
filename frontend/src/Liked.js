@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { playMusic, } from "./player";
-
+import { initializeSpotifyPlayer } from "./player";
 export const handlelike = async (
   songName,
   artistNames,
@@ -46,10 +46,13 @@ const Liked = () => {
   const uname = localStorage.getItem("username"); // ✅ Get username inside component
   const userid = localStorage.getItem("userId");
 const token = localStorage.getItem("access_token");
-const deviceId = localStorage.getItem("device_id");
+const [deviceId, setDeviceId] = useState(null);
+const [player, setPlayer] = useState(null);
+
   // ✅ Define fetchLikedSongs inside Liked so we can update state
   const fetchLikedSongs = async () => {
     try {
+      initializeSpotifyPlayer(token, setPlayer, setDeviceId);
       const response = await fetch(
         `http://localhost:5001/likedsongs?name=${uname}`
       );
@@ -67,7 +70,9 @@ const deviceId = localStorage.getItem("device_id");
   };
 
   useEffect(() => {
+   
     if (uname) {
+     
       fetchLikedSongs();
     }
   }, [uname]);
@@ -121,7 +126,9 @@ const deviceId = localStorage.getItem("device_id");
               <button
                 onClick={() => {
                   playMusic(token, deviceId, song.trackuri); 
-                 
+                 console.log("Playing song:", song.trackuri);
+                 console.log("Device ID:", deviceId);
+                  console.log("Token:", token);
                  
                 }}
                 style={{ marginLeft: "10px" }}

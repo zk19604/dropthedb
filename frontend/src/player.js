@@ -161,6 +161,7 @@ export async function playMusic(token, deviceId, trackUri) {
     },
     body: JSON.stringify({ uris: [trackUri] }),
   });
+  await new Promise((resolve) => setTimeout(resolve, 1000)); // 1 second delay
   const currentTrackResponse = await fetch(
     "https://api.spotify.com/v1/me/player/currently-playing",
     {
@@ -170,7 +171,10 @@ export async function playMusic(token, deviceId, trackUri) {
       },
     }
   );
-
+  if (currentTrackResponse.status === 204) {
+    console.warn("No track currently playing (204 No Content).");
+    return;
+  }
   if (!currentTrackResponse.ok) {
     throw new Error("Failed to fetch current track");
   }
@@ -272,26 +276,6 @@ function Player() {
 
   const [searchResults, setSearchResults] = useState([]);
 
-  // useEffect(() => {
-
-  //   async function fetchToken() {
-  //     const params = new URLSearchParams(window.location.search);
-  //     const code = params.get("code");
-
-  //     const accessToken = await getAccessToken(code);
-  //     if (accessToken) {
-  //       setToken(accessToken);
-  //       const userProfile = await fetchProfile(token);
-  //       setProfile(userProfile);
-  //       setUserId(userProfile.id);
-  //       initializeSpotifyPlayer(token, setPlayer, setDeviceId);
-
-  //     } else {
-  //       console.error("Failed to get access token");
-  //     }
-  //   }
-  //   fetchToken();
-  // }, [token]);
   useEffect(() => {
     async function fetchToken() {
       const params = new URLSearchParams(window.location.search);

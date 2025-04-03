@@ -1487,78 +1487,7 @@ app.delete("/removefriend", async (req, res) => {
   }
 });
 
-//Recommended songs
 
-//by top3 artists
-
-// app.get("/topartistsongs", async (req, res) => {
-//   const { id } = req.query;
-//   const userId = parseInt(id, 10); // Convert id to a number
-
-//   if (!userId || isNaN(userId)) {
-//     return res.status(400).json({ error: "Invalid User ID" });
-//   }
-//   try {
-//     const pool = await sql.connect(); // ✅ Ensure DB connection
-
-//     // Get top 3 artists liked by the user
-//     const topArtistsQuery = `
-//           SELECT TOP 3 sa.artistid, COUNT(t.songsid) AS like_count
-//           FROM TASTE t
-//           JOIN SONGSANDARTIST sa ON t.songsid = sa.songsid
-//           WHERE t.userid = @UserID
-//           GROUP BY sa.artistid
-//           ORDER BY like_count DESC;
-//       `;
-      // Get top 3 artists liked by the user
-      const topArtistsQuery = `
-          SELECT TOP 3 sa.artistid, COUNT(t.songsid) AS like_count, s.trackuri as trackuri
-          FROM TASTE t
-          join songs s on s.id = t.songsid
-          JOIN SONGSANDARTIST sa ON t.songsid = sa.songsid
-          WHERE t.userid = @UserID
-          GROUP BY sa.artistid, s.trackuri
-          ORDER BY like_count DESC;
-      `;
-
-//     const topArtistsResult = await pool
-//       .request()
-//       .input("UserID", sql.Int, id) // ✅ Bind parameter properly
-//       .query(topArtistsQuery);
-
-//     if (topArtistsResult.recordset.length === 0) {
-//       return res.json([]);
-//     }
-
-//     // Extract artist IDs
-//     const artistIds = topArtistsResult.recordset.map(row => row.artistid).join(",");
-
-//     // Ensure we have valid artist IDs before querying
-//     if (!artistIds) {
-//       return res.json([]);
-//     }
-
-//     // Fetch songs by these top artists, excluding already liked songs
-//     const songsQuery = `
-//           SELECT DISTINCT s.id AS songid, s.stitle, s.sgenre, s.salbumid, s.srating, s.trackuri
-//           FROM SONGS s
-//           JOIN SONGSANDARTIST sa ON s.id = sa.songsid
-//           WHERE sa.artistid IN (${artistIds})
-//           AND s.id NOT IN (SELECT songsid FROM TASTE WHERE userid = @UserID)
-//           AND s.trackuri IS NOT NULL; 
-//       `;
-
-//     const songsResult = await pool
-//       .request()
-//       .input("UserID", sql.Int, id) // ✅ Bind parameter properly
-//       .query(songsQuery);
-
-//     res.json(songsResult.recordset);
-//   } catch (error) {
-//     console.error("Error fetching top artist songs:", error);
-//     res.status(500).json({ error: "Internal Server Error" });
-//   }
-// });
 app.get("/topartistsongs", async (req, res) => {
   const { id } = req.query;
   const userId = id;

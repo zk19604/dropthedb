@@ -32,7 +32,7 @@ function Play() {
   return (
     <div
       style={{
-        position: "fixed",
+       
         bottom: 0,
         width: "100%",
         backgroundColor: "white",
@@ -41,6 +41,7 @@ function Play() {
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
+        zIndex: 1000, // Ensure it stays above other elements
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>

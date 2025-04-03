@@ -12,15 +12,17 @@ function Home() {
   return (
     <div>
       <Play />
-     
       <User searchName={username} /> 
       <a href={"/Ai"}>AI Recommendations</a>
-      <br></br>
+      <br/>
       <a href={"/reccomendedsongspage"}>View Recommended Songs</a>
-      <Friends />
+      <br/>
+      <a href = "/friends" >Friends </a>
+      {/* <Friends /> */}
       <Playlist/>
       <Player />
-      <Liked uname={username} /> 
+     
+      <Liked />
       <a href="/delete">Tired of us? Wanna delete?</a>
       <br />
     </div>
