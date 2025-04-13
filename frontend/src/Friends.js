@@ -6,7 +6,6 @@ const userId = localStorage.getItem("userId"); // Get userId from localStorage
 // ✅ Function to Get Friends' Songs
 export const getFriendsSongs = async () => {
   try {
-    
     const songResponse = await fetch(
       `http://localhost:5001/friendssongs?userId=${userId}`
     );
@@ -29,39 +28,40 @@ const Friends = () => {
   const [friendSongs, setFriendSongs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
- const token = localStorage.getItem("access_token");
- const [deviceId, setDeviceId] = useState(null);
- const [player, setPlayer] = useState(null);
- const fetchData = async () => {
-  try {
-    initializeSpotifyPlayer(token, setPlayer, setDeviceId);
-    const [friendsRes, usersRes, songsRes] = await Promise.all([
-      fetch(`http://localhost:5001/friends?userId=${userId}`),
-      fetch(`http://localhost:5001/allusers?userId=${userId}`),
-      getFriendsSongs(),
-    ]);
-    
-    if (!friendsRes.ok || !usersRes.ok)
-      throw new Error("Failed to fetch data");
+  const token = localStorage.getItem("access_token");
+  const [deviceId, setDeviceId] = useState(null);
+  const [player, setPlayer] = useState(null);
 
-    const friendsData = await friendsRes.json();
-    const usersData = await usersRes.json();
+  const fetchData = async () => {
+    try {
+      initializeSpotifyPlayer(token, setPlayer, setDeviceId);
+      const [friendsRes, usersRes, songsRes] = await Promise.all([
+        fetch(`http://localhost:5001/friends?userId=${userId}`),
+        fetch(`http://localhost:5001/allusers?userId=${userId}`),
+        getFriendsSongs(),
+      ]);
 
-    setFriends(friendsData);
-    setUsers(usersData);
-    setFriendSongs(songsRes);
-   
-  } catch (err) {
-    setError("Error fetching data");
-  } finally {
-    setLoading(false);
-  }
-};
+      if (!friendsRes.ok || !usersRes.ok)
+        throw new Error("Failed to fetch data");
+
+      const friendsData = await friendsRes.json();
+      const usersData = await usersRes.json();
+
+      setFriends(friendsData);
+      setUsers(usersData);
+      setFriendSongs(songsRes);
+    } catch (err) {
+      setError("Error fetching data");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if(userId) {
-    fetchData();
-  }}, [userId]);
+    if (userId) {
+      fetchData();
+    }
+  }, [userId]);
 
   const addFriend = async (friendId, friendName) => {
     try {
@@ -137,7 +137,7 @@ const Friends = () => {
       ) : (
         <ul>
           {friendSongs.map((song) => (
-            <li key={song.songsid}>
+            <li key={song.songsid} >
               <strong>{song.songtitle}</strong>
               <br />
               <span>
@@ -163,6 +163,7 @@ const Friends = () => {
               >
                 ▶️ Play
               </button>
+            
             </li>
           ))}
         </ul>

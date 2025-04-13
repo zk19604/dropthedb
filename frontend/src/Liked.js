@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { playMusic, } from "./player";
+import { playMusic } from "./player";
 import { initializeSpotifyPlayer } from "./player";
+import { fetchPlaylists } from "./Playlist";
+import { addsongstoplaylist } from "./Playlist";
 export const handlelike = async (
   songName,
   artistNames,
@@ -45,10 +47,12 @@ const Liked = () => {
   const [error, setError] = useState(null);
   const uname = localStorage.getItem("username"); // ✅ Get username inside component
   const userid = localStorage.getItem("userId");
-const token = localStorage.getItem("access_token");
-const [deviceId, setDeviceId] = useState(null);
-const [player, setPlayer] = useState(null);
-
+  const token = localStorage.getItem("access_token");
+  const [deviceId, setDeviceId] = useState(null);
+  const [player, setPlayer] = useState(null);
+  const [playlists, setPlaylists] = useState([]);
+  const [selectedPlaylist, setSelectedPlaylist] = useState("");
+  const [selectedSong, setSelectedSong] = useState(null);
   // ✅ Define fetchLikedSongs inside Liked so we can update state
   const fetchLikedSongs = async () => {
     try {
@@ -70,10 +74,9 @@ const [player, setPlayer] = useState(null);
   };
 
   useEffect(() => {
-   
     if (uname) {
-     
       fetchLikedSongs();
+      fetchPlaylists(setPlaylists);
     }
   }, [uname]);
   if (!uname) {
@@ -125,11 +128,10 @@ const [player, setPlayer] = useState(null);
               </span>
               <button
                 onClick={() => {
-                  playMusic(token, deviceId, song.trackuri); 
-                 console.log("Playing song:", song.trackuri);
-                 console.log("Device ID:", deviceId);
+                  playMusic(token, deviceId, song.trackuri);
+                  console.log("Playing song:", song.trackuri);
+                  console.log("Device ID:", deviceId);
                   console.log("Token:", token);
-                 
                 }}
                 style={{ marginLeft: "10px" }}
               >
@@ -141,6 +143,22 @@ const [player, setPlayer] = useState(null);
               >
                 Remove Like
               </button>
+              <select
+                value={selectedPlaylist}
+                onChange={(e) => {
+                  addsongstoplaylist(e.target.value, song.songsid);
+                  console.log("Selected playlist:", e.target.value);
+                  console.log("Selected song ID:", song.songsid);
+                }}
+                required
+              >
+                <option value="">Add to playlist</option>
+                {playlists.map((c, index) => (
+                  <option key={index} value={c.id}>
+                    {c.ptitle}
+                  </option>
+                ))}
+              </select>
             </li>
           ))}
         </ul>

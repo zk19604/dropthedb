@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from "react";
 
-export const handleplaylist = async () => {
 
-}
-export const addsongstoplaylist = async (playlistid, songId) => {
+export const addsongstoplaylist = async (playlistid, songsid) => {
   try {
-    if (!playlistid || !songId) {
+    if (!playlistid || !songsid) {
       throw new Error("Playlist ID and Song ID are required");
     }
 
     const response = await fetch(`http://localhost:5001/playlist_s`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ playlistid, songId }),
+      body: JSON.stringify({ playlistid, songsid }),
     });
 
     if (!response.ok) {
@@ -86,6 +84,26 @@ const deletePlaylist = async (playlistId) => {
   }
 };
 
+export const fetchPlaylists = async (setPlaylists) => {
+  try {
+    const userId = localStorage.getItem("userId");
+    if (!userId) throw new Error("User ID is missing");
+
+    const response = await fetch(
+      `http://localhost:5001/playlist?userId=${userId}`
+    );
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to fetch playlists");
+    }
+
+    const data = await response.json();
+    setPlaylists(data);
+  } catch (error) {
+    console.error("Error fetching playlists:", error.message);
+  }
+};
+
 // Playlist Component
 const Playlist = () => {
   const [playlists, setPlaylists] = useState([]);
@@ -121,30 +139,8 @@ const Playlist = () => {
     }
   };
 
-  const fetchPlaylists = async () => {
-    try {
-      const userId = localStorage.getItem("userId");
-      if (!userId) throw new Error("User ID is missing");
-
-      const response = await fetch(
-        `http://localhost:5001/playlist?userId=${userId}`
-      );
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to fetch playlists");
-      }
-
-      const data = await response.json();
-      setPlaylists(data);
-    } catch (error) {
-      console.error("Error fetching playlists:", error.message);
-    }
-  };
-  // Fetch playlists when component mounts
   useEffect(() => {
-
-
-    fetchPlaylists();
+    fetchPlaylists(setPlaylists);
   }, []);
 
   // Handle creating a playlist
@@ -163,7 +159,7 @@ const Playlist = () => {
       setPlaylists([...playlists, newPlaylist]); // Update state with new playlist
       setPlaylistName(""); // Reset input fields
       setDescription("");
-      fetchPlaylists();
+      fetchPlaylists(setPlaylists);
     }
   };
 
@@ -201,14 +197,16 @@ const Playlist = () => {
         <button type="submit">Create Playlist</button>
       </form>
 
-      {/* Display Playlists */}
       <ul>
         {playlists.map((playlist, index) => (
           <li key={playlist.id || index}>
             {" "}
             {/* Ensuring each list item has a unique key */}
-            <strong>{playlist.ptitle}</strong>{" "}
+            <a href={`/playlistsongs?playlistid=${playlist.id}&playlistname=${playlist.ptitle}`}>
+              <strong>{playlist.ptitle}</strong>
+            </a>{" "}
             {playlist.pdescription && ` - ${playlist.pdescription}`}
+
             <button
               onClick={() => handleDeletePlaylist(playlist.id)}
               style={{ marginLeft: "10px" }}

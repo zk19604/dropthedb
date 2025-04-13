@@ -3,7 +3,6 @@ import Player from "./player";
 import User from "./User";
 import Liked from "./Liked";
 import Playlist from "./Playlist";
-import Friends from "./Friends";
 import Play from "./Play";
 function Home() {
   const username = localStorage.getItem("username"); // ✅ Get username from localStorage
@@ -18,10 +17,8 @@ function Home() {
       <a href={"/reccomendedsongspage"}>View Recommended Songs</a>
       <br/>
       <a href = "/friends" >Friends </a>
-      {/* <Friends /> */}
       <Playlist/>
       <Player />
-     
       <Liked />
       <a href="/delete">Tired of us? Wanna delete?</a>
       <br />

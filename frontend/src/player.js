@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { handlelike } from "./Liked";
-import { handleplaylist } from "./Playlist"
+
 import RecommendedSongs from "./ReccomendedSongs";
 import RecommendedSongsByArtists from "./RCA";
 import RecommendedSongsByArtistsAndGenres from "./RCGA";
@@ -273,8 +273,10 @@ function Player() {
   const [token, setToken] = useState(localStorage.getItem("access_token"));
   const [query, setQuery] = useState("");
   const [userId, setUserId] = useState(null);
-
   const [searchResults, setSearchResults] = useState([]);
+
+    
+
 
   useEffect(() => {
     async function fetchToken() {
@@ -393,19 +395,7 @@ function Player() {
                     Like
                   </button>
 
-                  <button
-                    onClick={() =>
-                      handleplaylist(
-                        track.name,
-                        track.artists.map((artist) => artist.name).join(", "),
-                        track.album.images[0]?.url,
-                        track.uri
-                      )
-                    }
-                    style={{ marginLeft: "10px" }}
-                  >
-                    Add to playlist
-                  </button>
+                 
                 </div>
               ))}
             </div>
