@@ -1,0 +1,141 @@
+/* Overall body styling */
+body {
+	background: #ffd90071; /* Yellow base color */
+	font-family: "Syne", sans-serif;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	height: 100vh;
+	justify-content: center;
+	align-items: center;
+	background-image: linear-gradient(rgba(255, 215, 0, 0.9) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(255, 215, 0, 0.9) 1px, transparent 1px);
+	background-size: 25px 25px, 25px 25px; /* Pixelated grid */
+	background-position: -1px -1px, -1px -1px;
+	overflow: hidden;
+	position: relative;
+}
+
+/* Form container */
+.signup-container {
+	background-color: rgba(
+		255,
+		255,
+		255,
+		0.8
+	); /* Semi-transparent white for form */
+	padding: 30px;
+	border-radius: 10px;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+	width: 100%;
+	max-width: 400px;
+	text-align: center;
+}
+
+/* Heading styling */
+.signup-container h2 {
+	color: #333;
+	font-size: 2em;
+	margin-bottom: 20px;
+	font-weight: 700;
+}
+
+/* Input fields styling */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+select {
+	width: 100%;
+	padding: 12px;
+	margin: 10px 0;
+	border: 2px solid #ffd700; /* Yellow border */
+	border-radius: 5px;
+	background-color: rgba(255, 255, 255, 0.9);
+	font-size: 1em;
+	color: #333;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+select:focus {
+	outline: none;
+	border-color: #ff8c00; /* Darker yellow for focus */
+}
+
+/* Country Dropdown Styling */
+select {
+	-webkit-appearance: none; /* Removes default dropdown appearance in webkit browsers */
+	-moz-appearance: none; /* Removes default dropdown appearance in Firefox */
+	appearance: none;
+	background-color: #fff9c484; /* Light yellow background */
+	/* background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 6"%3E%3Cpath fill="none" stroke="black" d="M1 1l3 3 3-3" /%3E%3C/svg%3E'); Custom arrow icon */
+	background-position: right 10px center; /* Align the arrow to the right */
+	background-repeat: no-repeat; /* Prevent repeating the background image */
+	padding-right: 40px; /* Space for the custom arrow */
+	cursor: pointer; /* Change cursor on hover */
+	transition: background-color 0.3s ease;
+}
+
+select:hover {
+	background-color: #fdd835; /* Slightly darker yellow on hover */
+}
+
+/* Submit button styling */
+button[type="submit"] {
+	background-color: #ff8c0074; /* Orange-yellow */
+	color: white;
+	padding: 12px;
+	width: 100%;
+	border: none;
+	border-radius: 5px;
+	font-size: 1.2em;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+	background-color: #ff44005d; /* Dark orange */
+}
+
+/* Error message styling */
+.error-message {
+	color: red;
+	font-size: 0.9em;
+}
+
+/* Link styling */
+.signup-container p {
+	font-size: 0.9em;
+	color: #555;
+}
+
+.signup-container a {
+	color: #ff8c0046;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+.signup-container a:hover {
+	text-decoration: underline;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 480px) {
+	.signup-container {
+		padding: 20px;
+	}
+	.signup-container h2 {
+		font-size: 1.5em;
+	}
+	input[type="text"],
+	input[type="email"],
+	input[type="password"],
+	input[type="number"],
+	select,
+	button[type="submit"] {
+		padding: 10px;
+	}
+}

@@ -17,7 +17,7 @@ const RecommendedSongsByArtists = ({ userId, token, deviceId }) => { // Accept t
                     throw new Error('Failed to fetch recommended songs');
                 }
                 const data = await response.json();
-                console.log("Fetched songs:", data); // Debugging
+                // console.log("Fetched songs: aree", data); // Debugging
                 setSongs(data);
             } catch (error) {
                 setError(error.message);

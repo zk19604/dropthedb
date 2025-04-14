@@ -1,40 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import './signup.css';  // Make sure you import the CSS file for styling
+
 const countries = [
-  "Afghanistan",
-  "Albania",
-  "Algeria",
-  "Andorra",
-  "Angola",
-  "Argentina",
-  "Australia",
-  "Austria",
-  "Bangladesh",
-  "Belgium",
-  "Brazil",
-  "Canada",
-  "China",
-  "Denmark",
-  "Egypt",
-  "France",
-  "Germany",
-  "India",
-  "Indonesia",
-  "Italy",
-  "Japan",
-  "Mexico",
-  "Netherlands",
-  "Pakistan",
-  "Russia",
-  "South Africa",
-  "Spain",
-  "Sweden",
-  "United Kingdom",
-  "United States",
+  "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Argentina", "Australia", "Austria",
+  "Bangladesh", "Belgium", "Brazil", "Canada", "China", "Denmark", "Egypt", "France", "Germany",
+  "India", "Indonesia", "Italy", "Japan", "Mexico", "Netherlands", "Pakistan", "Russia", "South Africa",
+  "Spain", "Sweden", "United Kingdom", "United States",
 ];
-
-
-
 
 const SignUp = () => {
   const [username, setUsername] = useState("");
@@ -46,25 +19,23 @@ const SignUp = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-
-
-const validatePassword = (pwd) => {
+  const validatePassword = (pwd) => {
     const minLength = pwd.length >= 8;
     const hasUpperCase = /[A-Z]/.test(pwd);
     const hasLowerCase = /[a-z]/.test(pwd);
     const hasNumber = /[0-9]/.test(pwd);
     const hasSpecialChar = /[@$!%*?&]/.test(pwd);
-  
+
     if (!minLength) return "Password must be at least 8 characters.";
     if (!hasUpperCase) return "Password must include an uppercase letter.";
     if (!hasLowerCase) return "Password must include a lowercase letter.";
     if (!hasNumber) return "Password must include a number.";
     if (!hasSpecialChar)
       return "Password must include a special character (@$!%*?&).";
-  
+
     return ""; // No errors
   };
-  
+
   const handlePasswordChange = (e) => {
     const newPassword = e.target.value;
     setPassword(newPassword);
@@ -94,7 +65,7 @@ const validatePassword = (pwd) => {
   };
 
   return (
-    <div>
+    <div className="signup-container">
       <h2>Sign Up</h2>
       <form onSubmit={handleSubmit}>
         <input
@@ -118,16 +89,15 @@ const validatePassword = (pwd) => {
           onChange={handlePasswordChange}
           required
         />
-        {passwordError && <p style={{ color: "red" }}>{passwordError}</p>}
+        {passwordError && <p className="error-message">{passwordError}</p>}
         <input
           type="number"
-          placeholder="age"
+          placeholder="Age"
           value={age}
           min="13"
           onChange={(e) => setAge(e.target.value)}
           required
         />
-
         <select
           value={country}
           onChange={(e) => setCountry(e.target.value)}
@@ -142,7 +112,7 @@ const validatePassword = (pwd) => {
         </select>
         <button type="submit">Sign Up</button>
       </form>
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p className="error-message">{error}</p>}
     </div>
   );
 };
