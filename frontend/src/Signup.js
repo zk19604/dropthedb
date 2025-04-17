@@ -3,36 +3,10 @@ import { useNavigate } from "react-router-dom";
 import "./components/signup.css";
 
 const countries = [
-  "Afghanistan",
-  "Albania",
-  "Algeria",
-  "Andorra",
-  "Angola",
-  "Argentina",
-  "Australia",
-  "Austria",
-  "Bangladesh",
-  "Belgium",
-  "Brazil",
-  "Canada",
-  "China",
-  "Denmark",
-  "Egypt",
-  "France",
-  "Germany",
-  "India",
-  "Indonesia",
-  "Italy",
-  "Japan",
-  "Mexico",
-  "Netherlands",
-  "Pakistan",
-  "Russia",
-  "South Africa",
-  "Spain",
-  "Sweden",
-  "United Kingdom",
-  "United States",
+  "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Argentina", "Australia", "Austria",
+  "Bangladesh", "Belgium", "Brazil", "Canada", "China", "Denmark", "Egypt", "France", "Germany",
+  "India", "Indonesia", "Italy", "Japan", "Mexico", "Netherlands", "Pakistan", "Russia", "South Africa",
+  "Spain", "Sweden", "United Kingdom", "United States",
 ];
 
 const SignUp = () => {
@@ -55,6 +29,7 @@ const SignUp = () => {
     const hasNumber = /[0-9]/.test(pwd);
     const hasSpecialChar = /[@$!%*?&]/.test(pwd);
 
+
     if (!minLength) return "Password must be at least 8 characters.";
     if (!hasUpperCase) return "Password must include an uppercase letter.";
     if (!hasLowerCase) return "Password must include a lowercase letter.";
@@ -62,8 +37,10 @@ const SignUp = () => {
     if (!hasSpecialChar)
       return "Password must include a special character (@$!%*?&).";
 
+
     return ""; // No errors
   };
+
 
   const handlePasswordChange = (e) => {
     const newPassword = e.target.value;

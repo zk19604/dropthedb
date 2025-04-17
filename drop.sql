@@ -19,13 +19,14 @@ create table USERS(
     and upassword like '%[a-z]%'
     AND upassword LIKE '%[@$!%*?&]%'
 )
+
 );
 
 create table artist(
     id int identity(1,1) primary key,
     aname varchar(255),
-    --instagram varchar(255),
-   --gender VARCHAR(20) CHECK (gender IN ('Male', 'Female', 'Non-binary', 'Other')),
+    instagram varchar(255),
+   gender VARCHAR(20) CHECK (gender IN ('Male', 'Female', 'Non-binary', 'Other')),
     monthlystreams bigint
 
 )
@@ -50,8 +51,11 @@ create table SONGS(
     stitle varchar(255) not null,
     sgenre int ,
     salbumid int, 
-    srating float check(srating BETWEEN 0 AND 100), 
+ 
+    srating float check(srating BETWEEN 1 AND 5), 
     simage varchar(255),
+    srating float check(srating BETWEEN 1 AND 100), 
+    simage varchar(MAX),
     trackuri varchar(255),
     constraint sfk2 FOREIGN key (sgenre)
     REFERENCES genre(id),
@@ -129,6 +133,7 @@ go
 use project; 
 go
 
+
 go
 CREATE VIEW PlaylistSongsView AS
 SELECT ps.playlistid, s.id AS songid, s.stitle,  s.sgenre, s.salbumid, s.srating
@@ -168,52 +173,5 @@ go
 
 select * from UserLikedSongsView
 
-             SELECT 
-    distinct 
-    s.id AS songid,
-    s.stitle AS songtitle,
-    g.gname AS genre,
-    STRING_AGG(a.aname, ', ') AS artist_name,
-    al.aname AS album_name,
-    s.srating AS rating,
-    s.simage AS image_url,
-    s.trackuri AS track_uri
-FROM TASTE t
-JOIN SONGS s ON t.songsid = s.id
-LEFT JOIN genre g ON s.sgenre = g.id
-LEFT JOIN album al ON s.salbumid = al.id
-LEFT JOIN songsANDartist sa ON s.id = sa.songsid
-LEFT JOIN artist a ON sa.artistid = a.id
-left join friends f on (f.user1 = t.userid OR f.user2 = t.userid)
-WHERE f.user1 = 1002 OR f.user2 = 1002 and 
- a.aname IS NOT NULL and t.userid <> 1002
-GROUP BY 
-   
-    s.id,
-    s.stitle,
-    g.gname,
-    al.aname,
-    s.srating,
-    s.simage,
-    s.trackuri;
-
+           
     
-     SELECT 
-                s.id AS songsid, 
-                s.stitle,  
-                g.gname AS genre,
- STRING_AGG(a.aname, ', ') AS artist_name , 
-alb.aname AS album_name, 
-s.trackuri as trackuri
-            FROM taste
-            JOIN users u ON u.id = taste.userid
-            JOIN songs s ON s.id = taste.songsid
-            JOIN genre g ON s.sgenre = g.id
-            join album alb on alb.id=s.salbumid
-            LEFT JOIN songsANDartist sa ON s.id = sa.songsid
-            LEFT JOIN artist a ON sa.artistid = a.id
-            WHERE u.uname = 'zainab'
-            GROUP BY s.id, s.stitle, g.gname, alb.aname, s.trackuri
-
-
-            SELECT * FROM PlaylistSongsView psv join SONGS s on  psv.songid = s.id where playlistid = 8

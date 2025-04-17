@@ -2,7 +2,10 @@ import React, { useState } from "react";
 import "./components/login.css";
 import trialImage from "./components/images/trial.png";
 import { useNavigate } from "react-router-dom";
-
+import "./login.css";
+// import listeningImg from "./assets/listening.png";
+// import musicImg from "./assets/music.png";
+// import playerImg from "./assets/music-player.png";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

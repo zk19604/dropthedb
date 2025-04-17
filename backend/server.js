@@ -9,7 +9,7 @@ app.use(cors());
 
 const config = {
   user: "sa",
-  password: "Zainab.19",
+  password: "dd84b5aS@",
   server: "localhost",
   database: "project",
   options: {
@@ -1763,7 +1763,7 @@ app.post("/addsong", async (req, res) => {
   }
 });
 
-const clientId ="2cbadd009ef8428285512f390151a730";
+const clientId = "2cbadd009ef8428285512f390151a730";
 const clientSecret = "f8e498771c7f42f29fccfa9a72083555";
 const SPOTIFY_SEARCH_URL = "https://api.spotify.com/v1/search";
 // Function to get Spotify access token
@@ -1771,15 +1771,15 @@ const SPOTIFY_SEARCH_URL = "https://api.spotify.com/v1/search";
 
 async function getSpotifyAccessToken() {
   const response = await fetch("https://accounts.spotify.com/api/token", {
-      method: "POST",
-      headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({
-          grant_type: "client_credentials",
-          client_id: clientId,
-          client_secret: clientSecret,
-      }),
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      grant_type: "client_credentials",
+      client_id: clientId,
+      client_secret: clientSecret,
+    }),
   });
   const data = await response.json();
   return data.access_token;
@@ -1804,36 +1804,36 @@ app.get("/api/spotify-token-search", async (req, res) => {
 app.get("/searchairec", async (req, res) => {
   const { name } = req.query;
   if (!name) {
-      return res.status(400).json({ error: "Please provide a name query parameter." });
+    return res.status(400).json({ error: "Please provide a name query parameter." });
   }
 
   try {
-      const accessToken = await getSpotifyAccessToken();
-      const searchUrl = `${SPOTIFY_SEARCH_URL}?q=${encodeURIComponent(name)}&type=track&limit=1`;
-      
-      const response = await fetch(searchUrl, {
-          headers: {
-              "Authorization": `Bearer ${accessToken}`,
-          },
-      });
-      
-      const data = await response.json();
-      if (!data.tracks || !data.tracks.items.length) {
-          return res.status(404).json({ error: "No songs found." });
-      }
+    const accessToken = await getSpotifyAccessToken();
+    const searchUrl = `${SPOTIFY_SEARCH_URL}?q=${encodeURIComponent(name)}&type=track&limit=1`;
 
-      const songs = data.tracks.items.map((track) => ({
-        name: track.name,
-        artist: track.artists.map((artist) => artist.name).join(", "),
-        album: track.album.name,
-        uri: track.uri,
-        image: track.album.images[0]?.url
-      }));
+    const response = await fetch(searchUrl, {
+      headers: {
+        "Authorization": `Bearer ${accessToken}`,
+      },
+    });
 
-      res.json({ songs });
+    const data = await response.json();
+    if (!data.tracks || !data.tracks.items.length) {
+      return res.status(404).json({ error: "No songs found." });
+    }
+
+    const songs = data.tracks.items.map((track) => ({
+      name: track.name,
+      artist: track.artists.map((artist) => artist.name).join(", "),
+      album: track.album.name,
+      uri: track.uri,
+      image: track.album.images[0]?.url
+    }));
+
+    res.json({ songs });
   } catch (error) {
-      console.error("Error fetching songs:", error);
-      res.status(500).json({ error: "Internal server error" });
+    console.error("Error fetching songs:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

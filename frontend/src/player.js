@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { handlelike } from "./Liked";
+import { handleplaylist } from "./Playlist"
 
 import RecommendedSongs from "./ReccomendedSongs";
 
@@ -135,9 +136,6 @@ export async function initializeSpotifyPlayer(token, setPlayer, setDeviceId) {
   };
 }
 
-
-
-
 //token for spotfiy access
 //device id where the music will play
 //track uri, spotify uri of the track to play
@@ -237,7 +235,6 @@ export const addToSongs = async (songName, artistNames, imageUrl, trackUri, albu
         authornames: artistNames, // Array of artists
         genrename: genre,
         albumname: album,
-        albumname: album,
         rating: rating,
         simage: imageUrl,
         userId: localStorage.getItem("userId"),
@@ -264,10 +261,11 @@ function Player() {
   const [userId, setUserId] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
 
-    
+
 
 
   useEffect(() => {
+
     async function fetchToken() {
       const params = new URLSearchParams(window.location.search);
       const code = params.get("code");
@@ -275,9 +273,9 @@ function Player() {
       const accessToken = await getAccessToken(code);
       if (accessToken) {
         setToken(accessToken);
-        // const userProfile = await fetchProfile(accessToken); // ✅ Use new token
         const userProfile = await fetchProfile(token);
         setProfile(userProfile);
+        setUserId(userProfile.id);
         initializeSpotifyPlayer(token, setPlayer, setDeviceId);
 
       } else {
@@ -288,6 +286,9 @@ function Player() {
   }, [token]);
 
 
+  useEffect(() => {
+    console.log("Device ID:", deviceId);
+  }, [deviceId]);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -381,7 +382,7 @@ function Player() {
                     Like
                   </button>
 
-                 
+
                 </div>
               ))}
             </div>
