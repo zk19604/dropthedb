@@ -129,7 +129,7 @@ function Airec() {
                 <p>{song.uri}</p>
                 <button
                   onClick={() => {
-                    playMusic(token, deviceId, song.uri); // ✅ First function
+                    playMusic(token, deviceId, song.uri); 
                   }}
                   style={{ marginLeft: "10px" }}
                 >

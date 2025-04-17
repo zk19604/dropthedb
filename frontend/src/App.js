@@ -10,6 +10,8 @@ import Airecpage from "./Airecpage";
 import Liked from "./Liked";
 import Friends from "./Friends";
 import PlaylistSongs from "./PlaylistSongs";
+import PlayPage from "./PlayPage"
+import "./App.css"
 const App = () => {
     return (
         <Router>
@@ -24,7 +26,7 @@ const App = () => {
                 <Route path="/liked" element = {<Liked />}/>
                 <Route path="/friends" element = {<Friends />}/>
                 <Route path="/playlistsongs" element = {<PlaylistSongs />}/>
-                {/* Add other routes here */}
+                <Route path="/playlists" element = {<PlayPage/>}/>
             </Routes>
         </Router>
     );

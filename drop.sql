@@ -214,3 +214,6 @@ s.trackuri as trackuri
             LEFT JOIN artist a ON sa.artistid = a.id
             WHERE u.uname = 'zainab'
             GROUP BY s.id, s.stitle, g.gname, alb.aname, s.trackuri
+
+
+            SELECT * FROM PlaylistSongsView psv join SONGS s on  psv.songid = s.id where playlistid = 8
