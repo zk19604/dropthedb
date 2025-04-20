@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { handlelike } from "./Liked";
-import { handleplaylist } from "./Playlist"
 
-import RecommendedSongs from "./ReccomendedSongs";
+
 
 const clientId = "2cbadd009ef8428285512f390151a730";
 const clientSecret = "f8e498771c7f42f29fccfa9a72083555";
@@ -305,11 +304,6 @@ function Player() {
             <button onClick={() => pauseMusic(token)}>⏸ Pause</button>
           ) : (
             <p>🎵 Loading Spotify Player...</p>
-          )}
-          {userId && deviceId && (
-            <>
-             <RecommendedSongs userId={userId} token={token}  />
-            </>
           )}
 
           <form onSubmit={handleSearch}>

@@ -212,7 +212,7 @@ const SignUp = () => {
           </div>
         </div>
         <audio ref={audioRef} loop>
-          <source src="/music/signup.mp3" type="audio/mpeg" />
+          <source src="/music/death.mp3" type="audio/mpeg" />
           Your browser does not support the audio element.
         </audio>
       </div>
