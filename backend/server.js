@@ -2,10 +2,8 @@ const express = require("express");
 const sql = require("mssql");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-
 const app = express();
 const port = 5001;
-
 app.use(bodyParser.json());
 app.use(cors());
 
@@ -209,10 +207,9 @@ app.put("/users", async (req, res) => {
       return res.status(400).json({ message: "User ID is required" });
     }
 
-    // Construct update query dynamically
     let updates = [];
     let request = new sql.Request();
-    //updates fields only that are required instead of all
+
     if (uname) {
       updates.push("uname = @uname");
       request.input("uname", sql.VarChar, uname);
@@ -269,16 +266,13 @@ app.delete("/users", async (req, res) => {
     const pool = await sql.connect(config);
     const request = pool.request();
 
-    // Dynamically generate parameterized placeholders for each ID
     const idParams = ids.map((_, index) => `@id${index}`).join(", ");
     const query = `DELETE FROM users WHERE id IN (${idParams})`;
 
-    // Bind each ID to the request object
     ids.forEach((id, index) => {
       request.input(`id${index}`, sql.Int, id);
     });
 
-    // Execute the DELETE query
     const result = await request.query(query);
 
     if (result.rowsAffected[0] === 0) {
@@ -1044,7 +1038,7 @@ app.post("/likes", async (req, res) => {
     transaction = new sql.Transaction(pool);
     await transaction.begin();
 
-    // 1️⃣ **Insert Genre if not exists**
+
     let genreResult = await pool
       .request()
       .input("genrename", sql.VarChar, genrename)
@@ -1057,7 +1051,7 @@ app.post("/likes", async (req, res) => {
         .query("INSERT INTO GENRE (gname) OUTPUT INSERTED.id VALUES (@genrename)")
       ).recordset[0].id;
 
-    // 2️⃣ **Insert Album if not exists**
+
     let albumResult = await pool
       .request()
       .input("albumname", sql.VarChar, albumname)
@@ -1070,7 +1064,7 @@ app.post("/likes", async (req, res) => {
         .query("INSERT INTO ALBUM (aname) OUTPUT INSERTED.id VALUES (@albumname)")
       ).recordset[0].id;
 
-    // 3️⃣ **Check if song exists**
+
     let songResult = await pool
       .request()
       .input("trackUri", sql.VarChar, trackUri)
@@ -1092,7 +1086,6 @@ app.post("/likes", async (req, res) => {
                 `)
       ).recordset[0].id;
 
-    // 4️⃣ **Insert Artists and Link to Song**
     for (let artistName of authornames) {
       let artistResult = await pool
         .request()
@@ -1106,7 +1099,7 @@ app.post("/likes", async (req, res) => {
           .query("INSERT INTO ARTIST (aname) OUTPUT INSERTED.id VALUES (@artistName)")
         ).recordset[0].id;
 
-      // ✅ **Check if song-artist link exists before inserting**
+
       let linkCheck = await pool
         .request()
         .input("songId", sql.Int, songId)
@@ -1126,7 +1119,7 @@ app.post("/likes", async (req, res) => {
       }
     }
 
-    // 5️⃣ **Insert into TASTE table (Liked Songs)**
+
     let tasteCheck = await pool
       .request()
       .input("userId", sql.Int, userId)
@@ -1203,7 +1196,7 @@ app.get("/playlistsongs", async (req, res) => {
       return res.status(400).json({ message: "Playlist ID is required" });
     }
 
-    const query = `SELECT * FROM PlaylistSongsView WHERE playlistid = @playlistid`;
+    const query = `SELECT * FROM PlaylistSongsView psv join SONGS s on  psv.songid = s.id where playlistid = @playlistid`;
     const pool = await sql.connect(config);
     const request = pool.request();
     request.input("playlistid", sql.Int, playlistid);
@@ -1385,7 +1378,6 @@ app.post("/addfriends", async (req, res) => {
       return res.status(400).json({ message: "Friendship already exists" });
     }
 
-    // Insert new friendship
     await pool
       .request()
       .input("user1", sql.Int, user1)
@@ -1528,9 +1520,7 @@ app.get("/topgenresongs", async (req, res) => {
     return res.status(400).json({ error: "Invalid User ID" });
   }
   try {
-    const pool = await sql.connect(); // ✅ Ensure DB connection
-
-    // Get top 3 genres liked by the user
+    const pool = await sql.connect(); 
     const topGenresQuery = `
           SELECT TOP 3 s.sgenre, COUNT(t.songsid) AS like_count
           FROM TASTE t
@@ -1542,7 +1532,7 @@ app.get("/topgenresongs", async (req, res) => {
 
     const topGenresResult = await pool
       .request()
-      .input("UserID", sql.Int, id) // ✅ Bind parameter properly
+      .input("UserID", sql.Int, id) 
       .query(topGenresQuery);
 
     if (topGenresResult.recordset.length === 0) {
@@ -1569,7 +1559,7 @@ app.get("/topgenresongs", async (req, res) => {
 
     const songsResult = await pool
       .request()
-      .input("UserID", sql.Int, id) // ✅ Bind parameter properly
+      .input("UserID", sql.Int, id) 
       .query(songsQuery);
 
     res.json(songsResult.recordset);
@@ -1581,13 +1571,13 @@ app.get("/topgenresongs", async (req, res) => {
 
 app.get("/topartistandgenresongs", async (req, res) => {
   const { id } = req.query;
-  const userId = id; // Convert id to a number
+  const userId = id; 
 
   if (!userId || isNaN(userId)) {
     return res.status(400).json({ error: "Invalid User ID" });
   }
   try {
-    const pool = await sql.connect(); // ✅ Ensure DB connection
+    const pool = await sql.connect(); 
 
     // Get the top 3 artists liked by the user
     const topArtistsQuery = `
@@ -1601,7 +1591,7 @@ app.get("/topartistandgenresongs", async (req, res) => {
 
     const topArtistsResult = await pool
       .request()
-      .input("UserID", sql.Int, id) // ✅ Bind parameter properly
+      .input("UserID", sql.Int, id) 
       .query(topArtistsQuery);
 
     // Get the top 3 genres liked by the user
@@ -1616,7 +1606,7 @@ app.get("/topartistandgenresongs", async (req, res) => {
 
     const topGenresResult = await pool
       .request()
-      .input("UserID", sql.Int, id) // ✅ Bind parameter properly
+      .input("UserID", sql.Int, id) 
       .query(topGenresQuery);
 
     if (topArtistsResult.recordset.length === 0 && topGenresResult.recordset.length === 0) {
@@ -1648,7 +1638,7 @@ app.get("/topartistandgenresongs", async (req, res) => {
 
     const songsResult = await pool
       .request()
-      .input("UserID", sql.Int, id) // ✅ Bind parameter properly
+      .input("UserID", sql.Int, id) 
       .query(songsQuery);
 
     res.json(songsResult.recordset);
@@ -1677,7 +1667,7 @@ app.post("/addsong", async (req, res) => {
     transaction = new sql.Transaction(pool);
     await transaction.begin();
 
-    // 1️⃣ **Insert Genre if not exists**
+   
     let genreResult = await pool
       .request()
       .input("genrename", sql.VarChar, genrename)
@@ -1690,7 +1680,7 @@ app.post("/addsong", async (req, res) => {
         .query("INSERT INTO GENRE (gname) OUTPUT INSERTED.id VALUES (@genrename)")
       ).recordset[0].id;
 
-    // 2️⃣ **Insert Album if not exists**
+   
     let albumResult = await pool
       .request()
       .input("albumname", sql.VarChar, albumname)
@@ -1703,7 +1693,7 @@ app.post("/addsong", async (req, res) => {
         .query("INSERT INTO ALBUM (aname) OUTPUT INSERTED.id VALUES (@albumname)")
       ).recordset[0].id;
 
-    // 3️⃣ **Check if song exists**
+   
     let songResult = await pool
       .request()
       .input("trackUri", sql.VarChar, trackUri)
@@ -1725,7 +1715,7 @@ app.post("/addsong", async (req, res) => {
                 `)
       ).recordset[0].id;
 
-    // 4️⃣ **Insert Artists and Link to Song**
+   
     for (let artistName of authornames) {
       let artistResult = await pool
         .request()
@@ -1739,7 +1729,7 @@ app.post("/addsong", async (req, res) => {
           .query("INSERT INTO ARTIST (aname) OUTPUT INSERTED.id VALUES (@artistName)")
         ).recordset[0].id;
 
-      // ✅ **Check if song-artist link exists before inserting**
+    
       let linkCheck = await pool
         .request()
         .input("songId", sql.Int, songId)

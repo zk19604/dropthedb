@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Play from "./Play";
 import { playMusic } from "./player"; // Import playMusic function
 import { initializeSpotifyPlayer } from "./player"; // Import Spotify player initialization
 const userId = localStorage.getItem("userId"); // Get userId from localStorage
@@ -45,6 +46,7 @@ const PlaylistSongs = () => {
 
   return (
     <div>
+      <Play />
       <h1>{playlistname}</h1>
 
       {/* Display the songs of the selected playlist */}

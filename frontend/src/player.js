@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { handlelike } from "./Liked";
-import { handleplaylist } from "./Playlist"
+
 
 
 const clientId = "2cbadd009ef8428285512f390151a730";
@@ -13,13 +13,11 @@ const scopes = [
   "streaming",
   "user-modify-playback-state",
   "user-read-playback-state",
-].join(" "); //for spotify authentication url , requires spaces
-
+].join(" "); 
 const authUrl = `https://accounts.spotify.com/authorize?response_type=code&client_id=${clientId}&scope=${encodeURIComponent(
   scopes
 )}&redirect_uri=${encodeURIComponent(redirectUri)}`;
 
-//redirecting url to login with spotify
 const loginWithSpotify = () => {
   window.location.href = authUrl;
 };
@@ -29,12 +27,10 @@ async function getAccessToken(code) {
   let refreshToken = localStorage.getItem("refresh_token");
   let expiresAt = localStorage.getItem("expires_at");
 
-  //Check if access token is still valid
   if (accessToken && new Date().getTime() < expiresAt) {
     return accessToken;
   }
 
-  //Refresh token if it exists
   if (refreshToken) {
     console.log("Refreshing access token...");
     const params = new URLSearchParams();
@@ -61,7 +57,6 @@ async function getAccessToken(code) {
       return data.access_token;
     }
 
-    //If refresh fails, clear storage and force re-login
     console.error("Refresh token expired or invalid.");
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
@@ -69,7 +64,7 @@ async function getAccessToken(code) {
     return null;
   }
 
-  //If no refresh token, get a new one using auth code
+
   console.log("Fetching new access token...");
   const params = new URLSearchParams();
   params.append("grant_type", "authorization_code");
@@ -112,13 +107,10 @@ async function fetchProfile(token) {
 }
 
 export async function initializeSpotifyPlayer(token, setPlayer, setDeviceId) {
-  //web player sdk
   const script = document.createElement("script");
   script.src = "https://sdk.scdn.co/spotify-player.js";
   script.async = true;
   document.body.appendChild(script);
-
-  //initialise the spotify player
   window.onSpotifyWebPlaybackSDKReady = () => {
     const player = new window.Spotify.Player({
       name: "My Web Player",
@@ -203,7 +195,7 @@ async function searchSongs(token, query) {
   );
 
   const data = await result.json();
-
+  console.log(data);
   if (!data.tracks || !data.tracks.items) {
     console.log("No tracks found.");
     return [];
