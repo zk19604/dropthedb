@@ -52,7 +52,7 @@ const Login = () => {
       <div className="pixel pixel-4"></div>
       <div className="pixel-login-card">
         <div className="window-bar">
-        <div className="window-title">Run.exe - Music Player</div>
+          <div className="window-title">Run.exe - Music Player</div>
           <div className="window-controls">
             <div className="window-button">_</div>
             <div className="window-button">□</div>
@@ -103,7 +103,7 @@ const Login = () => {
               </a>
             </div>
           </div>
-        
+
 
           <div className="equalizer">
             <div className="equalizer-bar"></div>

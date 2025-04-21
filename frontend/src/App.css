@@ -2,8 +2,8 @@
 @import url("https://fonts.googleapis.com/css2?family=VT323&display=swap");
 
 body {
-	background: #ffd90047; 
-	font-family: 'Press Start 2P', monospace;
+	background: #ffd90047;
+	font-family: "Press Start 2P", monospace;
 	margin: 0;
 	padding: 0;
 	display: flex;
@@ -12,7 +12,7 @@ body {
 	align-items: center;
 	background-image: linear-gradient(rgba(255, 215, 0, 0.9) 1px, transparent 1px),
 		linear-gradient(90deg, rgba(255, 215, 0, 0.9) 1px, transparent 1px);
-	background-size: 25px 25px, 25px 25px; 
+	background-size: 25px 25px, 25px 25px;
 	background-position: -1px -1px, -1px -1px;
 }
 
@@ -59,4 +59,3 @@ body::after {
 	z-index: -1;
 	pointer-events: none;
 }
-

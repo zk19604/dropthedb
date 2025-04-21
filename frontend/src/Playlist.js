@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-
+import { Link } from "react-router-dom";
+import "./playlist.css";
 
 export const addsongstoplaylist = async (playlistid, songsid) => {
   try {
@@ -19,21 +20,19 @@ export const addsongstoplaylist = async (playlistid, songsid) => {
     }
 
     console.log("Song added successfully to playlist");
-    return true; // Indicate success
+    return true;
   } catch (error) {
     console.error("Error adding song to playlist:", error);
-    return false; // Indicate failure
+    return false;
   }
 };
 
-// Create Playlist Function (Outside the Component)
 export const createPlaylist = async (ptitle, pdescription, userid) => {
   try {
     if (!ptitle || !userid) {
       throw new Error("Playlist title and User ID are required");
     }
 
-    // If no description is provided, set it to an empty string or null
     const description =
       pdescription && pdescription.trim() !== "" ? pdescription : null;
 
@@ -53,34 +52,6 @@ export const createPlaylist = async (ptitle, pdescription, userid) => {
     return data;
   } catch (error) {
     console.error("Error creating playlist:", error);
-  }
-};
-
-// Delete Playlist Function (Outside the Component)
-const deletePlaylist = async (playlistId) => {
-  try {
-    if (!playlistId) {
-      throw new Error("Playlist ID is required");
-    }
-
-    const response = await fetch(
-      `http://localhost:5001/playlist/${playlistId}`,
-      {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-      }
-    );
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to delete playlist");
-    }
-
-    console.log("Playlist deleted successfully");
-    return true; // Indicate success
-  } catch (error) {
-    console.error("Error deleting playlist:", error);
-    return false; // Indicate failure
   }
 };
 
@@ -104,11 +75,10 @@ export const fetchPlaylists = async (setPlaylists) => {
   }
 };
 
-// Playlist Component
 const Playlist = () => {
   const [playlists, setPlaylists] = useState([]);
   const [playlistName, setPlaylistName] = useState("");
-  const [description, setDescription] = useState(""); // Optional description
+  const [description, setDescription] = useState("");
   const [error, setError] = useState("");
   const userId = localStorage.getItem("userId");
 
@@ -132,10 +102,11 @@ const Playlist = () => {
       }
 
       console.log("Playlist deleted successfully");
-      return true; // Indicate success
+      setPlaylists(playlists.filter((playlist) => playlist.id !== playlistId));
+      return true;
     } catch (error) {
       console.error("Error deleting playlist:", error);
-      return false; // Indicate failure
+      return false;
     }
   };
 
@@ -143,7 +114,6 @@ const Playlist = () => {
     fetchPlaylists(setPlaylists);
   }, []);
 
-  // Handle creating a playlist
   const handleCreatePlaylist = async (e) => {
     e.preventDefault();
 
@@ -152,71 +122,125 @@ const Playlist = () => {
       return;
     }
 
-    setError(""); // Clear error if name is provided
+    setError("");
 
     const newPlaylist = await createPlaylist(playlistName, description, userId);
     if (newPlaylist) {
-      setPlaylists([...playlists, newPlaylist]); // Update state with new playlist
-      setPlaylistName(""); // Reset input fields
+      setPlaylistName("");
       setDescription("");
       fetchPlaylists(setPlaylists);
     }
   };
 
-  // Handle deleting a playlist
-  const handleDeletePlaylist = async (playlistId) => {
-    await deletePlaylist(playlistId);
-    setPlaylists(playlists.filter((playlist) => playlist.id !== playlistId));
-    fetchPlaylists();
+  // Get first letter of playlist name for thumbnail
+  const getInitial = (name) => {
+    return name.charAt(0).toUpperCase();
+  };
+
+  // Funky vibrant colors for playlist thumbnails
+  const getPlaylistColor = (index) => {
+    const colors = [
+      "#FF427F", // Pink
+      "#5D3FD3", // Purple
+      "#00C2FF", // Blue
+      "#00D98B", // Green
+      "#FFB400", // Yellow
+      "#FF5722", // Orange
+      "#8BC34A", // Light Green
+      "#9C27B0", // Deep Purple
+      "#FF2E63", // Red
+      "#00BCD4", // Cyan
+    ];
+    return colors[index % colors.length];
   };
 
   return (
-    <div>
-      <h1>My Playlists</h1>
 
-      {/* Playlist Creation Form */}
-      <form onSubmit={handleCreatePlaylist}>
-        <div>
-          <label>Playlist Name (Required): </label>
-          <input
-            type="text"
-            value={playlistName}
-            onChange={(e) => setPlaylistName(e.target.value)}
-            required
-          />
+    <div className="playlist-container">
+      <div className="playlist-header">
+        <div className="playlist-title-box">
+          <div className="playlist-title">
+            <h1 className="playlist-text">PLAYLIST</h1>
+          </div>
         </div>
-        <div>
-          <label>Description (Optional): </label>
-          <input
-            type="text"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-        </div>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        <button type="submit">Create Playlist</button>
-      </form>
+      </div>
 
-      <ul>
-        {playlists.map((playlist, index) => (
-          <li key={playlist.id || index}>
-            {" "}
-            {/* Ensuring each list item has a unique key */}
-            <a href={`/playlistsongs?playlistid=${playlist.id}&playlistname=${playlist.ptitle}`}>
-              <strong>{playlist.ptitle}</strong>
-            </a>{" "}
-            {playlist.pdescription && ` - ${playlist.pdescription}`}
+      <div className="create-form-container">
+        <h2 className="form-title">Create New Playlist</h2>
+        <form onSubmit={handleCreatePlaylist}>
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="playlist-name">Playlist Name (Required):</label>
+              <input
+                id="playlist-name"
+                type="text"
+                className="form-control name-input"
+                value={playlistName}
+                onChange={(e) => setPlaylistName(e.target.value)}
+                placeholder="Enter playlist name"
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="playlist-description">Description (Optional):</label>
+              <input
+                id="playlist-description"
+                type="text"
+                className="form-control description-input"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Enter playlist description"
+              />
+            </div>
+          </div>
+          {error && <p className="error-message">{error}</p>}
+          <button type="submit" className="create-button">
+            CREATE PLAYLIST
+          </button>
+        </form>
+      </div>
 
-            <button
-              onClick={() => handleDeletePlaylist(playlist.id)}
-              style={{ marginLeft: "10px" }}
-            >
-              Delete
-            </button>
-          </li>
-        ))}
-      </ul>
+      <div className="playlists-container">
+        <h2 className="playlists-title">My Playlists</h2>
+
+        {playlists.length === 0 ? (
+          <div className="empty-playlists">
+            You don't have any playlists yet. Create one!
+          </div>
+        ) : (
+          <div className="playlists-list">
+            {playlists.map((playlist, index) => (
+              <div key={playlist.id || index} className="playlist-item">
+                <div
+                  className="playlist-thumbnail"
+                  style={{ backgroundColor: getPlaylistColor(index) }}
+                >
+                  {getInitial(playlist.ptitle)}
+                </div>
+                <div className="playlist-info">
+                  <Link
+                    to={`/playlistsongs?playlistid=${playlist.id}&playlistname=${playlist.ptitle}`}
+                    className="playlist-name"
+                  >
+                    {playlist.ptitle}
+                  </Link>
+                  {playlist.pdescription && (
+                    <p className="playlist-description">{playlist.pdescription}</p>
+                  )}
+                </div>
+                <button
+                  onClick={() => deletePlaylist(playlist.id)}
+                  className="delete-button"
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
+
   );
 };
 
