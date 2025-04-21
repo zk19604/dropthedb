@@ -9,7 +9,7 @@ app.use(cors());
 
 const config = {
   user: "sa",
-  password: "dd84b5aS@",
+  password: "Zainab.19",
   server: "localhost",
   database: "project",
   options: {
@@ -1410,8 +1410,8 @@ app.get("/friendssongs", async (req, res) => {
     al.aname AS album_name,
     s.srating AS rating,
     s.simage AS image_url,
-    s.trackuri AS track_uri,
-    t.userid AS friend_id
+    s.trackuri AS track_uri
+ 
 FROM FRIENDS f
 JOIN TASTE t ON (f.user1 = t.userid OR f.user2 = t.userid) 
 JOIN SONGS s ON t.songsid = s.id
@@ -1429,8 +1429,7 @@ GROUP BY
     al.aname,
     s.srating,
     s.simage,
-    s.trackuri,
-    t.userid;
+    s.trackuri
 
             
 

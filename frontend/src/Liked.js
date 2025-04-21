@@ -45,15 +45,14 @@ const Liked = () => {
   const [likedSongs, setLikedSongs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const uname = localStorage.getItem("username"); // ✅ Get username inside component
+  const uname = localStorage.getItem("username"); 
   const userid = localStorage.getItem("userId");
   const token = localStorage.getItem("access_token");
   const [deviceId, setDeviceId] = useState(null);
   const [player, setPlayer] = useState(null);
   const [playlists, setPlaylists] = useState([]);
   const [selectedPlaylist, setSelectedPlaylist] = useState("");
-  const [selectedSong, setSelectedSong] = useState(null);
-  // ✅ Define fetchLikedSongs inside Liked so we can update state
+ 
   const fetchLikedSongs = async () => {
     try {
       initializeSpotifyPlayer(token, setPlayer, setDeviceId);
@@ -94,7 +93,6 @@ const Liked = () => {
         throw new Error("Failed to remove like");
       }
 
-      // ✅ Refresh liked songs after removing
       await fetchLikedSongs();
     } catch (error) {
       console.error("Error removing like:", error);
@@ -124,7 +122,9 @@ const Liked = () => {
               </span>
               <br />
               <span>
-                Album: {song.album_name ? song.album_name : "Unknown Genre"}
+                Album: {song.album_name ? song.album_name : "Unknown Author"}
+              <br/>
+                Genre:  {song.genre ? song.genre : "Unknown Genre"}
               </span>
               <button
                 onClick={() => {

@@ -180,6 +180,19 @@ async function pauseMusic(token) {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
+const fetchArtistGenre = async (token, artistId) => {
+  try {
+    const res = await fetch(`https://api.spotify.com/v1/artists/${artistId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    return data.genres?.[0] || "Unknown";
+  } catch (err) {
+    console.error("Failed to fetch artist genre", err);
+    return "Unknown";
+  }
+};
+
 
 async function searchSongs(token, query) {
   if (!query) return [];
@@ -187,7 +200,7 @@ async function searchSongs(token, query) {
   const result = await fetch(
     `https://api.spotify.com/v1/search?q=${encodeURIComponent(
       query
-    )}&type=track&limit=10`,
+    )}&type=track&limit=6`,
     {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
@@ -293,7 +306,15 @@ function Player() {
     e.preventDefault();
     if (!token) return;
     const results = await searchSongs(token, query);
-    setSearchResults(results);
+    const resultsWithGenres = await Promise.all(
+      results.map(async (track) => {
+        const artistId = track.artists[0]?.id;
+        const genre = await fetchArtistGenre(token, artistId);
+        return { ...track, genre }; // Add genre to the track object
+      })
+    );
+    setSearchResults(resultsWithGenres);
+    console.log(resultsWithGenres);
   };
   return (
     <div>
@@ -346,9 +367,7 @@ function Player() {
                         track.album.images[0]?.url, // ✅ Pass album image URL
                         track.uri,
                         track.album.name, // ✅ Pass album name correctly
-                        track.artists[0]?.genres
-                          ? track.artists[0].genres[0]
-                          : "Unknown", // ✅ Handle missing genre
+                        track.genre || "Unknown",
                         track.popularity
                       );
                     }}
@@ -365,9 +384,7 @@ function Player() {
                         track.album.images[0]?.url, // ✅ Pass album image URL
                         track.uri,
                         track.album.name, // ✅ Pass album name correctly
-                        track.artists[0]?.genres
-                          ? track.artists[0].genres[0]
-                          : "Unknown", // ✅ Handle missing genre
+                        track.genre || "Unknown",
                         track.popularity // ✅ Using Spotify's popularity rating as a rating
                       )
                     }

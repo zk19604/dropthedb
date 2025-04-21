@@ -71,25 +71,23 @@ function Airec() {
 
       const recommendedSongs = textResponse
         .split("\n")
-        .map((song) => song.replace(/^\d+\.\s*/, "").trim()) // Remove numbering if present
-        .filter((song) => song); // Remove empty entries
+        .map((song) => song.replace(/^\d+\.\s*/, "").trim()) 
+        .filter((song) => song); 
 
-      setSongs(recommendedSongs); // State update
-      console.log("Recommended Songs:", recommendedSongs); // Log recommended songs
+      setSongs(recommendedSongs); 
+      console.log("Recommended Songs:", recommendedSongs); 
 
-      // Optionally fetch song details from Spotify
       const songDetails = await Promise.all(
         recommendedSongs.map(async (song) => {
           const songData = await fetchSongsByName(song);
-          console.log("Song Data:", songData); // Debugging
+          console.log("Song Data:", songData); 
           if (songData.length > 0) {
-            // Return the full song data instead of just the first song
             return songData[0];
           }
         })
       );
 
-      setSongs(songDetails); // Update state with detailed songs
+      setSongs(songDetails); 
     } catch (error) {
       console.error("Error fetching recommendations:", error);
       setSongs(["Error: Unable to fetch recommendations."]);
@@ -122,21 +120,24 @@ function Airec() {
         <div>
           <h3>Recommended Songs:</h3>
           <ul>
-            {songs.map((song, index) => (
-              <li key={index}>
-                <strong>{song.name}</strong> by {song.artist} <br />
-                <em>Album: {song.album}</em> <br />
-                <p>{song.uri}</p>
-                <button
-                  onClick={() => {
-                    playMusic(token, deviceId, song.uri); 
-                  }}
-                  style={{ marginLeft: "10px" }}
-                >
-                  ▶️ Play
-                </button>
-              </li>
-            ))}
+          {songs.map((song, index) =>
+  song && song.name && song.artist ? (
+    <li key={index}>
+      <strong>{song.name}</strong> by {song.artist} <br />
+      <em>Album: {song.album}</em> <br />
+      <p>{song.uri}</p>
+      <button
+        onClick={() => {
+          playMusic(token, deviceId, song.uri);
+        }}
+        style={{ marginLeft: "10px" }}
+      >
+        ▶️ Play
+      </button>
+    </li>
+  ) : null
+)}
+
           </ul>
         </div>
       )}

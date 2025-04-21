@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { playMusic } from "./player"; // Import playMusic function
-import { initializeSpotifyPlayer } from "./player"; // Import Spotify player initialization
-const userId = localStorage.getItem("userId"); // Get userId from localStorage
+import { playMusic } from "./player";
+import { initializeSpotifyPlayer } from "./player"; 
+const userId = localStorage.getItem("userId"); 
 
-// ✅ Function to Get Friends' Songs
+
 export const getFriendsSongs = async () => {
   try {
     const songResponse = await fetch(

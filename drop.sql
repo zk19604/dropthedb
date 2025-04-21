@@ -1,4 +1,10 @@
 
+use master 
+go
+drop database project 
+go
+create database project;
+go
 use project; 
 go
 
@@ -26,7 +32,7 @@ create table artist(
     id int identity(1,1) primary key,
     aname varchar(255),
     instagram varchar(255),
-   gender VARCHAR(20) CHECK (gender IN ('Male', 'Female', 'Non-binary', 'Other')),
+    gender VARCHAR(20) CHECK (gender IN ('Male', 'Female', 'Non-binary', 'Other')),
     monthlystreams bigint
 
 )
@@ -51,9 +57,6 @@ create table SONGS(
     stitle varchar(255) not null,
     sgenre int ,
     salbumid int, 
- 
-    srating float check(srating BETWEEN 1 AND 5), 
-    simage varchar(255),
     srating float check(srating BETWEEN 1 AND 100), 
     simage varchar(MAX),
     trackuri varchar(255),
@@ -173,5 +176,9 @@ go
 
 select * from UserLikedSongsView
 
-           
-    
+select * from songs
+select * from genre 
+select stitle, gname from songs 
+join genre on genre.id = songs.sgenre
+
+select * from users
