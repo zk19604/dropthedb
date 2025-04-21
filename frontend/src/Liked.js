@@ -3,6 +3,7 @@ import { playMusic } from "./player";
 import { initializeSpotifyPlayer } from "./player";
 import { fetchPlaylists } from "./Playlist";
 import { addsongstoplaylist } from "./Playlist";
+import Play from "./Play";
 export const handlelike = async (
   songName,
   artistNames,
@@ -105,6 +106,7 @@ const Liked = () => {
 
   return (
     <div>
+      <Play />
       <h1>Liked Songs</h1>
       {likedSongs.length === 0 ? (
         <p>No liked songs for this user.</p>

@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
-
+import { useLocation } from "react-router-dom";
 const backendPort = 5001;
 
-function User({ searchName }) {
+function User() {
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const searchName = queryParams.get("searchName");
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false); // Track loading state
   const [error, setError] = useState(null); // Track error state
@@ -22,6 +25,7 @@ function User({ searchName }) {
         }
 
         const data = await response.json();
+        console.log(searchName);
         setUsers(data);
       } catch (error) {
         setError(error.message);

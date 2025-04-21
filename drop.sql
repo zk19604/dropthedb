@@ -182,3 +182,4 @@ select stitle, gname from songs
 join genre on genre.id = songs.sgenre
 
 select * from users
+SELECT * FROM USERS WHERE uname = 'zk'

@@ -17,8 +17,9 @@ function Home() {
         <h2 className="welcome">Welcome, {username} 👋</h2>
 
         <nav className="nav-links">
-          <Link to="/play">🎮 Play</Link>
-          <Link to="/user">👤 User Info</Link>
+          {/* <Link to="/play">🎮 Play</Link> */}
+          <Link to={`/user?searchName=${username}`}>👤 User Info</Link>
+
           <Link to="/ai">🤖 AI Recommendations</Link>
           <Link to="/reccomendedsongspage">🎵 View Recommended Songs</Link>
           <Link to="/friends">👯 Friends</Link>

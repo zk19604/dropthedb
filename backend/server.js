@@ -1012,6 +1012,7 @@ app.get("/users", async (req, res) => {
 
     const result = await request.query(query);
     res.status(200).json(result.recordset);
+   
   } catch (error) {
     res
       .status(500)
