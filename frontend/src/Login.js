@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./login.css";
-// import listeningImg from "./assets/listening.png";
-// import musicImg from "./assets/music.png";
-// import playerImg from "./assets/music-player.png";
+
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -46,99 +44,87 @@ const Login = () => {
 
     return (
         <>
-            {/* Background stickers */}
-            {/* 
-            <div
-                className="sticker-listening"
-                style={{ backgroundImage: `url(${listeningImg})` }}
-            ></div>
-            <div
-                className="sticker-music"
-                style={{ backgroundImage: `url(${musicImg})` }}
-            ></div>
-            <div
-                className="sticker-player"
-                style={{ backgroundImage: `url(${playerImg})` }}
-            ></div> */}
+            <div className="login-body">
 
-            {/* Floating pixels */}
-            <div className="pixel pixel-1"></div>
-            <div className="pixel pixel-2"></div>
-            <div className="pixel pixel-3"></div>
-            <div className="pixel pixel-4"></div>
+                {/* Floating pixels */}
+                <div className="pixel pixel-1"></div>
+                <div className="pixel pixel-2"></div>
+                <div className="pixel pixel-3"></div>
+                <div className="pixel pixel-4"></div>
 
-            <div className="login-container">
-                {/* Window Bar */}
-                <div className="window-bar">
-                    <div className="window-title">Run.exe - Music Player</div>
-                    <div className="window-controls">
-                        <div className="window-button">_</div>
-                        <div className="window-button">□</div>
-                        <div className="window-button">X</div>
+                <div className="login-container">
+                    {/* Window Bar */}
+                    <div className="window-bar">
+                        <div className="window-title">Run.exe - Music Player</div>
+                        <div className="window-controls">
+                            <div className="window-button">_</div>
+                            <div className="window-button">□</div>
+                            <div className="window-button">X</div>
+                        </div>
                     </div>
-                </div>
 
-                {/* Warning Box */}
-                <div className="warning-box">
-                    <div className="warning-header">
-                        <div className="warning-icon">⚠️</div>
-                        <div className="warning-title">WARNING!</div>
+                    {/* Warning Box */}
+                    <div className="warning-box">
+                        <div className="warning-header">
+                            <div className="warning-icon">⚠️</div>
+                            <div className="warning-title">WARNING!</div>
+                        </div>
+                        <div className="warning-text">
+                            Prepare to be swept off your feet with retro music that will transport you back in time!
+                        </div>
+                        <button className="warning-button">Let's GO</button>
                     </div>
-                    <div className="warning-text">
-                        Prepare to be swept off your feet with retro music that will transport you back in time!
+
+                    <h2 className="login-title">Music Player</h2>
+
+                    {/* Pixel Avatar */}
+                    <div className="pixel-avatar"></div>
+
+                    <form onSubmit={handleSubmit}>
+                        <input
+                            type="email"
+                            placeholder="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                        <input
+                            type="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                        <button type="submit">Login</button>
+                    </form>
+
+                    {error && <p className="error-message">{error}</p>}
+
+                    {/* Player Controls */}
+                    <div className="player-controls">
+                        <div className="player-button">◀◀</div>
+                        <div className="player-button">▶</div>
+                        <div className="player-button">▶▶</div>
                     </div>
-                    <button className="warning-button">Let's GO</button>
-                </div>
 
-                <h2 className="login-title">Music Player</h2>
+                    <div className="signup-section">
+                        <p>New member?</p>
+                        <a href="/signup" className="signup-link">Sign up</a>
+                    </div>
 
-                {/* Pixel Avatar */}
-                <div className="pixel-avatar"></div>
+                    {/* Social Icons */}
+                    <div className="social-icons">
+                        <div className="social-icon">♫</div>
+                        <div className="social-icon">♥</div>
+                    </div>
 
-                <form onSubmit={handleSubmit}>
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                    <input
-                        type="password"
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                    <button type="submit">Login</button>
-                </form>
-
-                {error && <p className="error-message">{error}</p>}
-
-                {/* Player Controls */}
-                <div className="player-controls">
-                    <div className="player-button">◀◀</div>
-                    <div className="player-button">▶</div>
-                    <div className="player-button">▶▶</div>
-                </div>
-
-                <div className="signup-section">
-                    <p>New member?</p>
-                    <a href="/signup" className="signup-link">Sign up</a>
-                </div>
-
-                {/* Social Icons */}
-                <div className="social-icons">
-                    <div className="social-icon">♫</div>
-                    <div className="social-icon">♥</div>
-                </div>
-
-                {/* Equalizer animation */}
-                <div className="equalizer">
-                    <div className="equalizer-bar"></div>
-                    <div className="equalizer-bar"></div>
-                    <div className="equalizer-bar"></div>
-                    <div className="equalizer-bar"></div>
+                    {/* Equalizer animation */}
+                    <div className="equalizer">
+                        <div className="equalizer-bar"></div>
+                        <div className="equalizer-bar"></div>
+                        <div className="equalizer-bar"></div>
+                        <div className="equalizer-bar"></div>
+                    </div>
                 </div>
             </div>
         </>
