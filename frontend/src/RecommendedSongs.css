@@ -1,0 +1,64 @@
+/* RecommendedSongs.css */
+
+.recommended-container {
+	max-width: 600px; /* smaller width */
+	margin: 40px auto;
+	padding: 20px;
+	background: #f9f9f9;
+	border: 2px solid #000;
+	box-shadow: 4px 4px 0px #000;
+	font-family: "Courier New", Courier, monospace;
+	border-radius: 10px;
+}
+
+.recommended-container h2 {
+	font-size: 1.5rem;
+	text-transform: uppercase;
+	margin-bottom: 16px;
+	border-bottom: 2px solid #000;
+	padding-bottom: 6px;
+}
+
+.filter-section {
+	margin-bottom: 20px;
+	font-weight: bold;
+}
+
+.filter-section label {
+	display: block;
+	margin-bottom: 10px;
+	cursor: pointer;
+}
+
+ul.song-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
+.song-list li {
+	background: #f0f0f0;
+	padding: 12px;
+	border: 1px solid #000;
+	border-radius: 6px;
+	margin-bottom: 10px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.song-list button {
+	padding: 6px 10px;
+	font-weight: bold;
+	text-transform: uppercase;
+	background: #fff;
+	border: 2px solid #000;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	font-size: 0.85rem;
+}
+
+.song-list button:hover {
+	background: #000;
+	color: #fff;
+}

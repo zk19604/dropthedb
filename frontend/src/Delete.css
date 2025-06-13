@@ -1,0 +1,73 @@
+.delete-container {
+	max-width: 500px;
+	margin: 50px auto;
+	padding: 30px;
+	border-radius: 16px;
+	background-color: #fff3f3;
+	box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+	font-family: "Segoe UI", sans-serif;
+	text-align: center;
+}
+
+.delete-container p {
+	font-size: 16px;
+	color: #333;
+	margin-bottom: 20px;
+}
+
+.delete-btn {
+	background-color: #ff4d4d;
+	color: white;
+	border: none;
+	padding: 12px 20px;
+	font-size: 16px;
+	border-radius: 12px;
+	cursor: pointer;
+	margin: 10px;
+	transition: background-color 0.3s ease;
+}
+
+.delete-btn:hover {
+	background-color: #e60000;
+}
+
+.confirm-box {
+	background-color: #ffeaea;
+	border-radius: 12px;
+	padding: 20px;
+	margin-top: 20px;
+	border: 1px solid #f5bcbc;
+}
+
+.confirm-box p {
+	font-weight: bold;
+	color: #990000;
+}
+
+.confirm-box button {
+	background-color: #000;
+	color: #fff;
+	border: none;
+	padding: 10px 18px;
+	margin: 8px;
+	border-radius: 10px;
+	cursor: pointer;
+}
+
+.confirm-box button:first-of-type {
+	background-color: #cc0000;
+}
+
+.confirm-box button:last-of-type {
+	background-color: #333;
+}
+
+.message-success {
+	color: green;
+	margin-top: 15px;
+}
+
+.message-error {
+	color: red;
+	margin-top: 15px;
+}

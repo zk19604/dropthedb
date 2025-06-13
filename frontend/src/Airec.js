@@ -1,0 +1,161 @@
+import { useState } from "react";
+import { playMusic } from "./player";
+import { initializeSpotifyPlayer } from "./player";
+import "./Airec.css";
+const API_KEY = "AIzaSyCLZN_0EzjgjXd6qrzW7wua4NyfxMcth1k";
+
+async function fetchSongsByName(name) {
+  try {
+    const response = await fetch(
+      `http://localhost:5001/searchairec?name=${encodeURIComponent(name)}`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch songs");
+    }
+
+    const data = await response.json();
+    if (data.songs) {
+      console.log("Fetched songs:", data.songs);
+      return data.songs;
+      // Debugging
+    } else {
+      throw new Error("No songs found.");
+    }
+  } catch (error) {
+    console.error("Error fetching songs:", error);
+    return [];
+  }
+}
+
+function Airec() {
+  const [mood, setMood] = useState("happy");
+  const [language, setLanguage] = useState("English");
+  const [songs, setSongs] = useState([]);
+  const moods = ["Happy", "Sad", "Relaxed", "Energetic", "Focused", "Chill"];
+  const languages = ["English", "Spanish", "French", "Hindi", "Urdu"];
+  const [deviceId, setDeviceId] = useState(null);
+  const [player, setPlayer] = useState(null);
+  const token = localStorage.getItem("access_token");
+
+  const handleGenerate = async () => {
+    try {
+      initializeSpotifyPlayer(token, setPlayer, setDeviceId);
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: `Suggest 3 songs in ${language} that match a ${mood.toLowerCase()} mood. Provide a numbered list with song name and artist. only the name of song and artist, even remove the statement here are 5 songs, and also make sure those songs are on spotify`,
+                  },
+                ],
+              },
+            ],
+          }),
+        }
+      );
+
+      const data = await res.json();
+      console.log("API Response:", data); // Debugging
+
+      const textResponse =
+        data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+      if (!textResponse) {
+        setSongs(["No recommendations found."]);
+        return;
+      }
+
+      const recommendedSongs = textResponse
+        .split("\n")
+        .map((song) => song.replace(/^\d+\.\s*/, "").trim())
+        .filter((song) => song);
+
+      setSongs(recommendedSongs);
+      console.log("Recommended Songs:", recommendedSongs);
+
+      const songDetails = await Promise.all(
+        recommendedSongs.map(async (song) => {
+          const songData = await fetchSongsByName(song);
+          console.log("Song Data:", songData);
+          if (songData.length > 0) {
+            return songData[0];
+          }
+        })
+      );
+
+      setSongs(songDetails);
+    } catch (error) {
+      console.error("Error fetching recommendations:", error);
+      setSongs(["Error: Unable to fetch recommendations."]);
+    }
+  };
+  return (
+    <div className="airec-container">
+      <h2>🎵 Mood-Based Song Recommender</h2>
+
+      <div className="form-section">
+        <label htmlFor="mood-select">Select Mood:</label>
+        <select
+          id="mood-select"
+          value={mood}
+          onChange={(e) => setMood(e.target.value)}
+        >
+          {moods.map((m) => (
+            <option key={m} value={m}>
+              {m}
+            </option>
+          ))}
+        </select>
+
+        <label htmlFor="language-select">Select Language:</label>
+        <select
+          id="language-select"
+          value={language}
+          onChange={(e) => setLanguage(e.target.value)}
+        >
+          {languages.map((lang) => (
+            <option key={lang} value={lang}>
+              {lang}
+            </option>
+          ))}
+        </select>
+
+        <button className="generate-btn" onClick={handleGenerate}>
+          Get Songs
+        </button>
+      </div>
+
+      {songs.length > 0 && (
+        <div className="song-list">
+          <h3>🎧 Recommended Songs</h3>
+          <ul>
+            {songs.map((song, index) =>
+              song && song.name && song.artist ? (
+                <li key={index} className="song-item">
+                  <strong>{song.name}</strong> by {song.artist} <br />
+                  <em>Album: {song.album || "Unknown"}</em>
+                  <br />
+
+                  <button
+                    onClick={() => {
+                      playMusic(token, deviceId, song.uri);
+                    }}
+                  >
+                    ▶️ Play
+                  </button>
+                </li>
+              ) : null
+            )}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default Airec;

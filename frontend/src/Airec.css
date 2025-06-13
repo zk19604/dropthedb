@@ -1,0 +1,85 @@
+.airec-container {
+	max-width: 600px;
+	margin: 30px auto;
+	padding: 24px;
+	border-radius: 16px;
+	background-color: #f9f9f9;
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+	font-family: "Segoe UI", sans-serif;
+}
+
+.airec-container h2 {
+	text-align: center;
+	margin-bottom: 24px;
+	color: #333;
+}
+
+.form-section {
+	margin-bottom: 20px;
+}
+
+.form-section label {
+	display: block;
+	margin-top: 12px;
+	font-weight: 600;
+}
+
+.form-section select {
+	width: 100%;
+	padding: 8px 10px;
+	border-radius: 8px;
+	margin-top: 6px;
+	border: 1px solid #ccc;
+	font-size: 14px;
+}
+
+.generate-btn {
+	margin-top: 20px;
+	padding: 10px 16px;
+	background-color: #1db954;
+	color: white;
+	border: none;
+	border-radius: 12px;
+	font-weight: bold;
+	cursor: pointer;
+	transition: background-color 0.3s;
+	display: block;
+	width: 100%;
+}
+
+.generate-btn:hover {
+	background-color: #17a44a;
+}
+
+.song-list {
+	margin-top: 28px;
+}
+
+.song-list ul {
+	list-style: none;
+	padding: 0;
+}
+
+.song-item {
+	background-color: #ffffff;
+	margin-bottom: 16px;
+	padding: 12px 16px;
+	border-radius: 12px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.song-item strong {
+	font-size: 16px;
+	color: #222;
+}
+
+.song-item em {
+	font-size: 14px;
+	color: #666;
+}
+
+.uri {
+	font-size: 12px;
+	color: #888;
+	word-break: break-all;
+}
